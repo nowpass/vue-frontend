@@ -272,12 +272,14 @@
             <div class="now-modal-inner">
                 <div class="now-modal-title">
                     <h4>
-                        <translate :word="'password_generator'" />
+                        <translate :word="'password_generator'"/>
                     </h4>
                 </div>
                 <div class="now-modal-body">
                     <div class="form-group">
-                        <label for="generator-password"><translate :word="'password'" />:</label>
+                        <label for="generator-password">
+                            <translate :word="'password'"/>
+                            :</label>
                         <div class="input-group">
                             <input type="text" id="generator-password" class="form-control"
                                    v-model.trim="generatedPassword"/>
@@ -291,16 +293,22 @@
 
                     <div class="form-group">
                         <input id="generator-numbers" type="checkbox" v-model="generatorNumbers"/>
-                        <label for="generator-numbers"><translate :word="'numbers'" /> (0-9)</label>
+                        <label for="generator-numbers">
+                            <translate :word="'numbers'"/>
+                            (0-9)</label>
                     </div>
 
                     <div class="form-group">
                         <input id="generator-special" type="checkbox" v-model="generatorSpecial"/>
-                        <label for="generator-special"><translate :word="'special_characters'" /></label>
+                        <label for="generator-special">
+                            <translate :word="'special_characters'"/>
+                        </label>
                     </div>
 
                     <div class="form-group">
-                        <label for="generator-length"><translate :word="'password_length'" />:</label>
+                        <label for="generator-length">
+                            <translate :word="'password_length'"/>
+                            :</label>
                         <div class="input-group">
                             <input type="range" id="generator-length" v-model="generatorLength" min="1" max="50"
                                    class="form-control">
@@ -312,43 +320,37 @@
                 </div>
                 <div class="now-modal-footer text-center">
                     <div class="form-group">
-                        <button class="btn btn-default" v-on:click.prevent="hideGenerator()"><translate :word="'cancel'" /></button>
+                        <button class="btn btn-default" v-on:click.prevent="hideGenerator()">
+                            <translate :word="'cancel'"/>
+                        </button>
                         <button class="btn btn-primary" v-on:click.prevent="usePassword(generatorElement)">
-                            <translate :word="'use_password'" />
+                            <translate :word="'use_password'"/>
                         </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div id="popup-loading" class="now-modal-footer now-fade now-fade-white"
-             v-bind:class="isLoading ? '' : 'invisible'">
-            <div class="now-modal-inner">
-                <div class="now-modal-body">
-                    <div class="row">
-                        <div class="col-4">
-                            <icon name="spinner" pulse scale="2"></icon>
-                        </div>
-                        <div class="col-8">
-                            <h3><translate :word="'loading'" /></h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div v-if="isLoading">
+            <loading v-once></loading>
+        </div>
+
+        <div v-if="showLoginFirst">
+            <login-first v-once></login-first>
         </div>
 
     </div><!-- //App -->
 </template>
 
 <script>
+    // Components
     import Login from './Login';
     import translate from './Translate'
     import Unlock from './Unlock'
+    import LoginFirst from "./LoginFirst";
 
     // 3rd party
     import axios from 'axios'
-    import aesjs from 'aes-js'
-    import sha256 from 'js-sha256'
     import Icon from 'vue-awesome/components/Icon'
     import dropdown from 'vue-my-dropdown';
 
@@ -362,15 +364,28 @@
     import 'vue-awesome/icons/sort'
     import 'vue-awesome/icons/plus-circle'
     import 'vue-awesome/icons/spinner'
+    import Loading from "./Loading";
 
     export default {
         name: 'nowpass',
-        components: {Icon, dropdown, translate, Login, Unlock},
+        components: {
+            Loading,
+            LoginFirst,
+            Icon,
+            dropdown,
+            translate,
+            Login,
+            Unlock
+        },
         mixins: [settings, decrypt],
         /**
          * Called on Vue create, resets passhrase, loads Elements and set the generated count
          */
         created() {
+            if (!this.apiKey) {
+                this.showLoginFirst = true;
+                return;
+            }
             this.loadElements();
             this.setGeneratedPassword();
         },
@@ -379,10 +394,6 @@
              * Load the Elements into the table (promise) - API key needs to be set
              */
             loadElements: function () {
-                if (!this.apiKey) {
-                    throw 'Api Key needs to be set!';
-                }
-
                 this.toggleLoading();
 
                 // Base URL (TODO move to mixin const)
@@ -557,7 +568,7 @@
              */
             showPassword: function (element) {
                 // Let's unlock that and save passphrase in state (if wanted)
-                if (this.passphrase === '') {
+                if (!this.passphrase) {
                     this.showUnlock = true;
                     this.unlockTask = 'password';
                     this.unlockElement = element;
@@ -708,7 +719,7 @@
             updatePassphrase: function (passphrase, activeElement, task) {
                 this.showUnlock = false;
 
-                if (passphrase === '') {
+                if (!passphrase) {
                     return;
                 }
 
@@ -735,6 +746,7 @@
             return {
                 apiUrl: this.getSetting('apiUrl', ''),
                 apiKey: this.getSetting('apiKey', ''),
+                showLoginFirst: false,
 
                 // Elements
                 elementToUnlock: null,
@@ -780,7 +792,8 @@
                 unlockElement: null,
                 unlockTask: '',
 
-                passphrase: this.getSetting('passphrase', ''),
+                // Check if we have a passphrase or temporary one
+                passphrase: this.getSetting('passphrase', '') || this.getSetting('temporary_passphrase'),
 
                 // Generator Popup
                 isGeneratorPopupActive: false,

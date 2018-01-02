@@ -15,7 +15,10 @@
                            v-on:keyup.13="unlock()"/>
                 </div>
                 <div class="form-group">
-
+                    <input id="remember" v-model="remember" type="checkbox" />
+                    <label for="remember">
+                        <translate :word="'remember_passphrase'" />
+                    </label>
                 </div>
             </div>
             <div class="now-modal-footer text-center">
@@ -47,23 +50,46 @@
              * Emit update_passphrase event to parent
              */
             unlock: function () {
+                console.log('Unlocking');
+
                 if (!this.passphrase) {
                     return;
                 }
 
-                this.$emit('update_passphrase', this.passphrase, this.element, this.task);
+                if (this.remember) {
+                    this.saveSetting('passphrase', this.passphrase);
+                    return;
+                }
+
+                // Reseted on every extension launch
+                this.saveSetting('temporary_passphrase', this.passphrase);
+
+                // Popup mode
+                if (this.$route.path !== '/unlock') {
+                    this.$emit('update_passphrase', this.passphrase, this.element, this.task);
+                    return;
+                }
+
+                this.$router.push('/');
             },
             /**
              * Emit update_passphrase event with empty passphrase
              */
             close: function () {
                 this.passphrase = '';
-                this.$emit('update_passphrase', this.passphrase, this.element, this.task);
+
+                if (this.$route.path !== '/unlock') {
+                    this.$emit('update_passphrase', this.passphrase, this.element, this.task);
+                    return;
+                }
+
+                this.$router.push('/');
             }
         },
         data() {
             return {
-                passphrase: ''
+                passphrase: '',
+                remember: false
             }
         }
     }

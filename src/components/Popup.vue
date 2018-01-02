@@ -33,7 +33,7 @@
             </div>
         </div>
 
-        <div class="list-group-item">
+        <div class="list-group-item align-self-center">
             <router-link to="/" target="_blank">
                 <icon name="unlock-alt"></icon>
                 <translate v-once :word="'my_vault'"/>
@@ -224,5 +224,10 @@
 <style scoped>
     #popup {
         min-width: 400px;
+    }
+
+    .fa-icon {
+        padding-top: 3px !important;
+        margin-right: 6px;
     }
 </style>
