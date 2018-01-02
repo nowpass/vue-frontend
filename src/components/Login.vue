@@ -1,4 +1,4 @@
-<!-- Very tightly coupled to parent, basically just outsourcing.. (TODO Loose that and use v-model and event emit) -->
+<!-- Very tightly coupled to parent, basically just outsourcing.. (TODO Loose that and use emit) -->
 <template>
     <div id="login" class="col-12">
         <h3>

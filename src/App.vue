@@ -3,11 +3,17 @@
 
         <div class="container-fluid">
             <div class="row">
-                <div id="nowpass-menu" class="col-md-2" v-if="$route.path != '/popup'">
-                    <router-link to="/">Vault</router-link>
-                    <router-link to="/options">Options</router-link>
-                    <!-- DEV -->
-                    <router-link to="/popup">Popup (DEV)</router-link>
+                <div id="nowpass-menu" class="col-md-2" v-if="$route.path !== '/popup'">
+                    <div class="list-group">
+                        <div id="nowpass-logo" class="text-center">
+                            <icon name="unlock-alt" scale="3"></icon>
+                        </div>
+
+                        <router-link to="/" class="list-group-item list-group-item-light">Vault</router-link>
+                        <router-link to="/options" class="list-group-item list-group-item-light">Options</router-link>
+                        <!-- DEV -->
+                        <router-link to="/popup" class="list-group-item list-group-item-light">Popup (DEV)</router-link>
+                    </div>
                 </div>
                 <div id="nowpass-content" class="col-md-10">
                     <!-- Content -->
@@ -20,13 +26,20 @@
 </template>
 
 <script>
+    // Components
     import translate from './components/Translate'
     import Options from './components/Options';
     import Vault from './components/Vault';
 
+    // 3rd party
+    import Icon from 'vue-awesome/components/Icon'
+
+    // Icons Font-Awesome
+    import 'vue-awesome/icons/unlock-alt'
+
     export default {
         name: 'nowpass',
-        components: {Options, Vault, translate},
+        components: {Options, Vault, translate, Icon},
         created() {
 
         },
@@ -37,12 +50,12 @@
     #nowpass {
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
-        color: #2c3e50;
     }
 
     #nowpass-menu {
-        background: #f1f1f1;
+        background: #3f3f3f;
         min-height: 100vh;
+        padding: 0;
     }
 
     #nowpass-content {
@@ -58,6 +71,10 @@
 
     #header h3 {
         line-height: 35px;
+    }
+
+    #nowpass-logo {
+        padding: 5px
     }
 
     /* Bootstrap Modals suck */
@@ -96,6 +113,12 @@
     .now-modal-footer {
         padding: 10px 15px 0;
         border-top: 1px solid #ccc;
+    }
+
+    .router-link-exact-active {
+        /** Fast hack **/
+        background: #818182 !important;
+        color: #fff !important;
     }
 </style>
 
