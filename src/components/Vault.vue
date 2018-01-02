@@ -8,14 +8,14 @@
                 </div>
                 <div class="col-3 text-right">
                     <!-- TODO Add debounce -->
-                    <input type="text" id="search" placeholder="Search" v-model="filterSearch" class="form-control"
+                    <input type="text" placeholder="Search" v-model="filterSearch" class="form-control"
                            v-on:keyup="resetPage().loadElements()"/>
                 </div>
             </div>
 
-            <div id="elements" class=" list-group">
+            <div id="elements" class="list-group">
                 <div id="elements-header" class="list-group-item active">
-                    <div class="row">
+                    <div class="row align-items-center">
                         <div class="col-md-1">
                         </div>
                         <div class="col-md-3">
@@ -46,7 +46,7 @@
                     <div v-for="element in elements"
                          class="single-element list-group-item"
                          v-bind:id="'element-' + element.id">
-                        <div class="row info-element " v-on:click="showElement(element)">
+                        <div class="row info-element align-items-center" v-on:click="showElement(element)">
                             <div class="col-md-1">
                                 <icon v-bind:name="iconMapping[element.kind]"></icon>
                             </div>
@@ -87,7 +87,7 @@
 
                         <div class="edit-element edit-row" v-if="element === editElement">
                             <div id="edit-element-container" class="col-12">
-                                <div class="row">
+                                <div class="row align-items-center">
                                     <div class="col-6">
                                         <div class="form-group">
                                             <label for="title">
@@ -187,7 +187,7 @@
                 </div><!-- //body-->
 
                 <div id="elements-footer" class="text-center list-group-item active">
-                    <div class="row">
+                    <div class="row align-items-center">
                         <div class="col-2 text-left">
                             <select v-model="limit" v-on:change="resetPage().loadElements()">
                                 <option value="3">3</option>
@@ -264,35 +264,8 @@
 
         </div> <!-- //Container -->
 
-        <div id="popup-passphrase" class="now-modal now-fade" v-bind:class="isPassphrasePopupActive ? '' : 'invisible'">
-            <div class="now-modal-inner">
-                <div class="now-modal-title">
-                    <h4>
-                        <translate :word="'enter_your_pass_phrase'"/>
-                    </h4>
-                </div>
-                <div class="now-modal-body">
-                    <div class="form-group">
-                        <label for="passhrase">Passphrase</label>
-                        <input type="password" id="passhrase" class="form-control" v-model.trim="passphrase"
-                               v-on:keyup.13="unlockPassphrase()"/>
-                    </div>
-                    <div class="form-group">
-
-                    </div>
-                </div>
-                <div class="now-modal-footer text-center">
-                    <div class="form-group">
-                        <button class="btn btn-default"
-                                v-on:click.prevent="isPassphrasePopupActive = false; passphrase = ''">
-                            <translate :word="'cancel'"/>
-                        </button>
-                        <button class="btn btn-primary" v-on:click.prevent="unlockPassphrase()">
-                            <translate :word="'unlock'" />
-                        </button>
-                    </div>
-                </div>
-            </div>
+        <div v-if="showUnlock">
+            <unlock v-on:update_passphrase="updatePassphrase" :element="unlockElement" :task="unlockTask"></unlock>
         </div>
 
         <div id="popup-generator" class="now-modal now-fade" v-bind:class="isGeneratorPopupActive ? '' : 'invisible'">
@@ -370,6 +343,7 @@
 <script>
     import Login from './Login';
     import translate from './Translate'
+    import Unlock from './Unlock'
 
     // 3rd party
     import axios from 'axios'
@@ -380,6 +354,7 @@
 
     // Mixins
     import settings from '../mixins/settings';
+    import decrypt from '../mixins/decrypt'
 
     // Font Awesome icons
     import 'vue-awesome/icons/user-circle'
@@ -390,8 +365,8 @@
 
     export default {
         name: 'nowpass',
-        components: {Icon, dropdown, translate, Login},
-        mixins: [settings],
+        components: {Icon, dropdown, translate, Login, Unlock},
+        mixins: [settings, decrypt],
         /**
          * Called on Vue create, resets passhrase, loads Elements and set the generated count
          */
@@ -410,8 +385,8 @@
 
                 this.toggleLoading();
 
-                // Base URL
-                let url = 'http://localhost:1337/api/v1/elements';
+                // Base URL (TODO move to mixin const)
+                let url = this.apiUrl + '/api/v1/elements';
 
                 let parts = [];
 
@@ -464,7 +439,9 @@
              */
             saveElement: function (saveElement) {
                 if (!this.passphrase) {
-                    this.isPassphrasePopupActive = true;
+                    this.showUnlock = true;
+                    this.unlockElement = null;
+                    this.unlockTask = '';
                     return;
                 }
 
@@ -472,17 +449,19 @@
                 let element = JSON.parse(JSON.stringify(saveElement));
 
                 let method = 'post';
-                let url = 'http://localhost:1337/api/v1/elements';
+
+                // Base URL (TODO move to const)
+                let url = this.apiUrl + '/api/v1/elements';
 
                 // Update
                 if (element.id) {
                     method = 'patch';
-                    url = 'http://localhost:1337/api/v1/elements/' + element.id;
+                    url = url + '/' + element.id;
                 }
 
                 // Let's make sure the password is encrypted..
                 if (element.clearPassword) {
-                    element.password = this.encrypt(element.clearPassword);
+                    element.password = this.encrypt(element.clearPassword, this.passphrase);
                 }
 
                 delete(element.clearPassword);
@@ -579,13 +558,13 @@
             showPassword: function (element) {
                 // Let's unlock that and save passphrase in state (if wanted)
                 if (this.passphrase === '') {
-                    this.isPassphrasePopupActive = true;
-                    this.elementToUnlock = element;
-
+                    this.showUnlock = true;
+                    this.unlockTask = 'password';
+                    this.unlockElement = element;
                     return;
                 }
 
-                let password = this.decrypt(element.password);
+                let password = this.decrypt(element.password, this.passphrase);
 
                 // TODO remove
                 console.log('Unlocked password ' + password);
@@ -604,100 +583,6 @@
             hidePassword: function (element) {
                 element.unlocked = false;
                 element.title = element.title.trim();
-            },
-
-            unlockPassphrase: function () {
-                // Simple validation that we have an input
-                if (!this.passphrase) {
-                    return;
-                }
-
-                this.isPassphrasePopupActive = false;
-
-                if (this.elementToUnlock != null) {
-                    this.showPassword(this.elementToUnlock);
-                }
-
-                if (this.generatorElement != null) {
-                    this.showGenerator(this.generatorElement);
-                }
-            },
-
-            /**
-             * Decrypts a AES CBC encrypted and base64 decoded password with the passphrase
-             *
-             * @param encrypted {string}
-             * @returns {string}
-             */
-            decrypt: function (encrypted) {
-                if (!this.passphrase) {
-                    throw 'No passphrase set'
-                }
-
-                // Blocksize = 32, IV size = 16
-                let hash = sha256.create();
-
-                // We need the digest
-                let key = hash.update(this.passphrase).digest();
-
-                encrypted = new Buffer(encrypted, 'base64');
-
-                let iv = encrypted.slice(0, 16);
-                let aesCbc = new aesjs.ModeOfOperation.cbc(key, iv);
-                let decryptedBytes = aesCbc.decrypt(encrypted.slice(16));
-
-                let last = decryptedBytes[decryptedBytes.length - 1];
-
-                return aesjs.utils.utf8.fromBytes(decryptedBytes.slice(0, -last));
-            },
-
-            /**
-             * Encrypt the given string with AES CBC 256 bit and the passphrase and base64 (for storing) encodes it
-             * @param clearText {string}
-             * @returns {string}
-             */
-            encrypt: function (clearText) {
-                // Shouldn't happen
-                if (!this.passphrase) {
-                    throw 'No passphrase set'
-                }
-
-                let bs = 32;
-                let hash = sha256.create();
-
-                this.passphrase = 'secure';
-
-                // We need the digest
-                let key = hash.update(this.passphrase).digest();
-
-                let clearBytes = aesjs.utils.utf8.toBytes(clearText);
-
-                // We need a min length
-                let fillCount = (bs - clearBytes.length % bs);
-                let char = String.fromCharCode(fillCount);
-
-                // Pad it to up
-                for (let i = 0; i < fillCount; i++) {
-                    clearText += char;
-                }
-
-                clearBytes = aesjs.utils.utf8.toBytes(clearText);
-
-                let crypto = window.crypto || window.msCrypto; // for IE 11
-                let iv = new Uint8Array(16);
-
-                // Get a set of random numbers (0-255)
-                crypto.getRandomValues(iv);
-
-                let aesCbc = new aesjs.ModeOfOperation.cbc(key, iv);
-                let cryptedBytes = aesCbc.encrypt(clearBytes);
-
-                // Add the IV in the beginning ( our salt)
-                let withIv = new Uint8Array(iv.length + cryptedBytes.length);
-                withIv.set(iv);
-                withIv.set(cryptedBytes, iv.length);
-
-                return new Buffer(withIv).toString('base64');
             },
 
             /**
@@ -725,8 +610,9 @@
              */
             showGenerator: function (element) {
                 if (!this.passphrase) {
-                    this.generatorElement = element;
-                    this.isPassphrasePopupActive = true;
+                    this.unlockElement = element;
+                    this.unlockTask = 'generator';
+                    this.showUnlock = true;
 
                     return;
                 }
@@ -752,7 +638,7 @@
              * @param element {object}
              */
             usePassword: function (element) {
-                element.password = this.encrypt(this.generatedPassword);
+                element.password = this.encrypt(this.generatedPassword, this.passphrase);
                 element.clearPassword = this.generatedPassword;
                 element.unlocked = true;
 
@@ -811,6 +697,38 @@
                 };
 
                 this.isShowNewLogin = true;
+            },
+
+            /**
+             * Update the passphrase
+             * @param passphrase
+             * @param activeElement
+             * @param task
+             */
+            updatePassphrase: function (passphrase, activeElement, task) {
+                this.showUnlock = false;
+
+                if (passphrase === '') {
+                    return;
+                }
+
+                this.passphrase = passphrase;
+
+                console.log(passphrase);
+                console.log(activeElement);
+                console.log(task);
+
+                if (activeElement == null) {
+                    return;
+                }
+
+                if (task === 'password') {
+                    this.showPassword(activeElement);
+                    return;
+                }
+
+                // Return
+                this.showGenerator(activeElement);
             }
         },
         data() {
@@ -858,8 +776,10 @@
                 isLoading: false,
 
                 // Passphrase Popup
+                showUnlock: false,
+                unlockElement: null,
+
                 passphrase: this.getSetting('passphrase', ''),
-                isPassphrasePopupActive: false,
 
                 // Generator Popup
                 isGeneratorPopupActive: false,
@@ -888,30 +808,6 @@
         color: #2c3e50;
     }
 
-    /* Bootstrap Modals suck */
-    .now-fade {
-        position: fixed;
-        width: 100%;
-        height: 100%;
-        top: 0;
-        left: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        align-content: center;
-        background: rgba(0, 0, 0, 0.8);
-        z-index: 9;
-    }
-
-    .now-fade-white {
-        background: rgba(255, 255, 255, 0.8);
-    }
-
-    .now-modal-inner {
-        background: #fff;
-        border-radius: 5px;
-    }
-
     #elements-header a {
         color: #fff;
     }
@@ -923,20 +819,6 @@
 
     .info-element {
         cursor: pointer;
-    }
-
-    .now-modal-title {
-        border-bottom: 1px solid #ccc;
-        padding: 10px 15px;
-    }
-
-    .now-modal-body {
-        padding: 10px 15px;
-    }
-
-    .now-modal-footer {
-        padding: 10px 15px 0;
-        border-top: 1px solid #ccc;
     }
 
     .dialog {
@@ -960,6 +842,3 @@
     }
 
 </style>
-
-
-

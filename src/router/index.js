@@ -2,10 +2,9 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Options from '@/components/Options'
 import Vault from '@/components/Vault'
+import Popup from '@/components/Popup'
 
 Vue.use(Router)
-
-const Bar = {template: '<div>bar</div>'}
 
 export default new Router({
     routes: [
@@ -20,8 +19,8 @@ export default new Router({
             component: Options
         },
         {
-            path: '/bar',
-            component: Bar
+            path: '/popup',
+            component: Popup
         }
     ]
 })
