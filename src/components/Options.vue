@@ -53,8 +53,8 @@
                 </div>
 
                 <div class="form-group">
-                    <input type="checkbox" v-model="storePassphrase" />
-                    <label id="label-store-passphrase">
+                    <input type="checkbox" v-model="storePassphrase" id="store-passphrase"/>
+                    <label id="label-store-passphrase" for="store-passphrase">
                         <translate v-once :word="'storePassphrase'" /> (<translate v-once :word="'insecure'" />)
                     </label>
                 </div>
@@ -92,6 +92,9 @@
             this.loadOptions();
         },
         methods: {
+            /**
+             * Load the options from the localstorage mixin
+             */
             loadOptions: function () {
                 this.apiUrl = this.getSetting('apiUrl', 'http://localhost:1337');
                 this.apiEmail = this.getSetting('apiEmail', '');
@@ -106,10 +109,17 @@
                 }
             },
 
+            /**
+             * Test the options against the API, but don't save them
+             */
             testOptions: function () {
                 this.validateAndSave(false);
             },
-            
+
+            /**
+             * Validate the settings against the API and save them
+             * @param store {bool}
+             */
             validateAndSave: function (store=true) {
                 // TODO static consts with version
                 let url = this.apiUrl + '/api/v1/entrance/login';
@@ -139,6 +149,10 @@
                 });
             },
 
+            /**
+             * Store the settings including api-key
+             * @param apiKey {string}
+             */
             store: function (apiKey) {
                 this.saveSetting('apiUrl', this.apiUrl);
                 this.saveSetting('apiEmail', this.apiEmail);
@@ -178,24 +192,3 @@
         }
     }
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-    h1, h2 {
-        font-weight: normal;
-    }
-
-    ul {
-        list-style-type: none;
-        padding: 0;
-    }
-
-    li {
-        display: inline-block;
-        margin: 0 10px;
-    }
-
-    a {
-        color: #42b983;
-    }
-</style>

@@ -23,10 +23,10 @@
                     </div>
                     <div class="col-5 text-right" v-if="element.password">
                         <button class="btn btn-default" v-on:click.prevent="copyPassword(element)">
-                            Copy Password
+                            <translate :word="'copy_password'"/>
                         </button>
                         <button class="btn btn-primary">
-                            Use
+                            <translate :word="'use'"/>
                         </button>
                     </div>
                 </div>
@@ -35,37 +35,47 @@
 
         <div class="list-group-item">
             <router-link to="/" target="_blank">
+                <icon name="unlock-alt"></icon>
                 <translate v-once :word="'my_vault'"/>
             </router-link>
         </div>
         <div class="list-group-item">
             <router-link to="/notes" target="_blank">
+                <icon name="sticky-note-o"></icon>
                 <translate v-once :word="'my_notes'"/>
             </router-link>
         </div>
         <div class="list-group-item">
             <router-link to="/generate-password">
+                <icon name="random"></icon>
                 <translate v-once :word="'generate_password'"/>
             </router-link>
         </div>
         <div class="list-group-item">
             <a href="https://nowpass.org/help" target="_blank">
+                <icon name="question-circle"></icon>
                 <translate v-once :word="'help'"/>
             </a>
         </div>
         <div class="list-group-item">
-            <router-link to="/notes" target="_blank">
+            <router-link to="/options" target="_blank">
+                <icon name="cog"></icon>
                 <translate v-once :word="'options'"/>
             </router-link>
         </div>
         <div class="list-group-item list-group-item-light">
             <router-link to="/logout" target="_blank">
+                <icon name="sign-out"></icon>
                 <translate v-once :word="'logout'"/>
             </router-link>
         </div>
 
         <div v-if="showUnlock">
             <unlock v-on:update_passphrase="updatePassphrase" :element="activeElement"></unlock>
+        </div>
+
+        <div v-if="showLoginFirst">
+            <login-first></login-first>
         </div>
 
     </div><!-- //popup -->
@@ -75,22 +85,43 @@
     // Components
     import translate from './Translate'
     import Unlock from './Unlock'
+    import LoginFirst from "./LoginFirst";
 
     // Mixins
     import settings from '../mixins/settings'
     import decrypt from '../mixins/decrypt'
 
+    // 3rd party
     import axios from 'axios'
+    import Icon from 'vue-awesome/components/Icon'
+
+    // Icons Font-Awesome
+    import 'vue-awesome/icons/cog'
+    import 'vue-awesome/icons/question-circle'
+    import 'vue-awesome/icons/sign-out'
+    import 'vue-awesome/icons/random'
+    import 'vue-awesome/icons/sticky-note-o'
+    import 'vue-awesome/icons/unlock-alt'
 
     export default {
         name: "popup",
-        components: {translate, Unlock},
+        components: {
+            LoginFirst,
+            translate,
+            Unlock,
+            Icon
+        },
         mixins: [settings, decrypt],
         created() {
-            this.searchElements();
+            // Make sure user is logged in :-)
+            if (this.apiKey !== '') {
+                this.showLoginFirst = false;
+            }
         },
         methods: {
-
+            /**
+             * Search for elements
+             */
             searchElements: function () {
                 if (!this.apiKey) {
                     throw 'Api Key needs to be set!';
@@ -120,6 +151,10 @@
                     vm.errorMsg = error.response.status + ' ' + error.response.statusText;
                 });
             },
+            /**
+             * Copy Password
+             * @param element {object}
+             */
             copyPassword: function (element) {
                 if (!this.passphrase) {
                     this.activeElement = element;
@@ -134,7 +169,7 @@
                 console.log('to clipboard ' + element.clearPassword);
 
                 // Works on current Chromium
-                document.oncopy = function(event) {
+                document.oncopy = function (event) {
                     event.clipboardData.setData("Text", element.clearPassword);
                     event.preventDefault();
                 };
@@ -142,6 +177,11 @@
                 document.execCommand("Copy");
                 document.oncopy = undefined;
             },
+            /**
+             * Update the passphrase
+             * @param passphrase {string}
+             * @param activeElement
+             */
             updatePassphrase: function (passphrase, activeElement) {
                 this.showUnlock = false;
 
@@ -173,8 +213,9 @@
                 activeElement: null,
                 activeTask: 'copy',
 
-                filterSearch: 'test',
-                errorMsg: ''
+                filterSearch: '',
+                errorMsg: '',
+                showLoginFirst: true
             }
         }
     }

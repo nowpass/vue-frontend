@@ -8,6 +8,13 @@
         </span>\
         ',
         methods: {
+            /**
+             * Translate a string (in dev just add ##), else against the chrome.i18n API
+             * @param string {string}
+             * @param ucfirst {bool}
+             * @param placeholders {array}
+             * @returns {string}
+             */
             translate(string, ucfirst=false, placeholders) {
                 if (process.env.NODE_ENV === 'development') {
                     if (ucfirst) {

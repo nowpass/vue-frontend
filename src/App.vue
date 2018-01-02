@@ -10,6 +10,7 @@
                     <router-link to="/popup">Popup (DEV)</router-link>
                 </div>
                 <div id="nowpass-content" class="col-md-10">
+                    <!-- Content -->
                     <router-view></router-view>
                 </div>
             </div>
@@ -33,6 +34,12 @@
 </script>
 
 <style>
+    #nowpass {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        color: #2c3e50;
+    }
+
     #nowpass-menu {
         background: #f1f1f1;
         min-height: 100vh;

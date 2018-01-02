@@ -43,6 +43,9 @@
         components: {translate},
         mixins: [settings],
         methods: {
+            /**
+             * Emit update_passphrase event to parent
+             */
             unlock: function () {
                 if (!this.passphrase) {
                     return;
@@ -50,6 +53,9 @@
 
                 this.$emit('update_passphrase', this.passphrase, this.element, this.task);
             },
+            /**
+             * Emit update_passphrase event with empty passphrase
+             */
             close: function () {
                 this.passphrase = '';
                 this.$emit('update_passphrase', this.passphrase, this.element, this.task);
@@ -62,7 +68,3 @@
         }
     }
 </script>
-
-<style scoped>
-
-</style>

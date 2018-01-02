@@ -778,6 +778,7 @@
                 // Passphrase Popup
                 showUnlock: false,
                 unlockElement: null,
+                unlockTask: '',
 
                 passphrase: this.getSetting('passphrase', ''),
 
@@ -802,12 +803,6 @@
 </script>
 
 <style>
-    #nowpass {
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        color: #2c3e50;
-    }
-
     #elements-header a {
         color: #fff;
     }
@@ -840,5 +835,4 @@
         background: #f1f1f1;
         padding: 10px;
     }
-
 </style>
