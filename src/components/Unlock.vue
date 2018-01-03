@@ -40,6 +40,9 @@
     import translate from './Translate'
     import settings from '../mixins/settings'
 
+    /**
+     * Unlocks the passphrase
+     */
     export default {
         name: "unlock",
         props: ['element', 'task'],
@@ -70,7 +73,14 @@
                     return;
                 }
 
-                this.$router.push('/');
+                if (process.env.NODE_ENV === 'development') {
+                    this.$router.push('/');
+                    return;
+                }
+
+                chrome.tabs.getCurrent(function(tab) {
+                    chrome.tabs.remove(tab.id, function() { });
+                });
             },
             /**
              * Emit update_passphrase event with empty passphrase
@@ -83,7 +93,14 @@
                     return;
                 }
 
-                this.$router.push('/');
+                if (process.env.NODE_ENV === 'development') {
+                    this.$router.push('/');
+                    return;
+                }
+
+                chrome.tabs.getCurrent(function(tab) {
+                    chrome.tabs.remove(tab.id, function() { });
+                });
             }
         },
         data() {

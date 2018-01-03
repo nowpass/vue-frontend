@@ -14,6 +14,9 @@
 <script>
     import translate from './Translate'
 
+    /**
+     * Login first popup / overlay
+     */
     export default {
         name: "login-first",
         components: {translate},

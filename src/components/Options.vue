@@ -84,6 +84,9 @@
     import settings from '../mixins/settings'
     import axios from 'axios'
 
+    /**
+     * Options
+     */
     export default {
         name: 'Options',
         components: {translate},

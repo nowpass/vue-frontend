@@ -1,4 +1,7 @@
 <script>
+    /**
+     * Translation helper
+     */
     export default {
         name: "translate",
         props: ['word', 'ucfirst', 'placeholders'],

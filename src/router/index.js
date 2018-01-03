@@ -4,9 +4,14 @@ import Options from '@/components/Options'
 import Vault from '@/components/Vault'
 import Popup from '@/components/Popup'
 import Unlock from '@/components/Unlock'
+import Lab from '@/components/Lab'
+import Insert from '@/components/Insert'
 
 Vue.use(Router)
 
+/**
+ * Router for nowpass
+ */
 export default new Router({
     routes: [
         {
@@ -26,6 +31,14 @@ export default new Router({
         {
             path: '/unlock',
             component: Unlock
+        },
+        {
+            path: '/lab',
+            component: Lab
+        },
+        {
+            path: '/insert/:url',
+            component: Insert
         }
     ]
 })

@@ -90,6 +90,9 @@
 <script>
     import translate from './Translate'
 
+    /**
+     * Login view
+     */
     export default {
         name: "login",
         components: {translate},

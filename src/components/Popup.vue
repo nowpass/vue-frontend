@@ -25,9 +25,6 @@
                         <button class="btn btn-default" v-on:click.prevent="copyPassword(element)">
                             <translate :word="'copy_password'"/>
                         </button>
-                        <button class="btn btn-primary">
-                            <translate :word="'use'"/>
-                        </button>
                     </div>
                 </div>
             </div>
@@ -78,6 +75,9 @@
             <login-first></login-first>
         </div>
 
+        <div v-if="isLoading">
+            <loading v-once></loading>
+        </div>
     </div><!-- //popup -->
 </template>
 
@@ -86,6 +86,7 @@
     import translate from './Translate'
     import Unlock from './Unlock'
     import LoginFirst from "./LoginFirst";
+    import loading from './Loading'
 
     // Mixins
     import settings from '../mixins/settings'
@@ -103,11 +104,15 @@
     import 'vue-awesome/icons/sticky-note-o'
     import 'vue-awesome/icons/unlock-alt'
 
+    /**
+     * View for the extension popup
+     */
     export default {
         name: "popup",
         components: {
             LoginFirst,
             translate,
+            loading,
             Unlock,
             Icon
         },
@@ -206,7 +211,7 @@
             return {
                 apiUrl: this.getSetting('apiUrl', ''),
                 apiKey: this.getSetting('apiKey', ''),
-                passphrase: this.getSetting('passphrase', ''),
+                passphrase: this.getSetting('passphrase', '') || this.getSetting('temporary_passphrase'),
                 showUnlock: false,
 
                 elements: [],
@@ -215,7 +220,9 @@
 
                 filterSearch: '',
                 errorMsg: '',
-                showLoginFirst: true
+                showLoginFirst: true,
+
+                isLoading: false,
             }
         }
     }

@@ -1,3 +1,6 @@
+/**
+ * Wrapper arround the window.localStorage engine
+ */
 export default {
     name: 'Settings',
     methods: {

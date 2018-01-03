@@ -366,6 +366,9 @@
     import 'vue-awesome/icons/spinner'
     import Loading from "./Loading";
 
+    /**
+     * Main Management for Elements (except Notes)
+     */
     export default {
         name: 'nowpass',
         components: {

@@ -3,7 +3,7 @@
 
         <div class="container-fluid">
             <div class="row">
-                <div id="nowpass-menu" class="col-md-2" v-if="$route.path !== '/popup'">
+                <div id="nowpass-menu" class="col-md-2" v-if="$route.path !== '/popup' && !$route.path.startsWith('/insert/')">
                     <div class="list-group">
                         <div id="nowpass-logo" class="text-center">
                             <icon name="unlock-alt" scale="3"></icon>
@@ -37,11 +37,13 @@
     // Icons Font-Awesome
     import 'vue-awesome/icons/unlock-alt'
 
+    /**
+     * Entry point (mostly just an skeleton, logic is in the components)
+     */
     export default {
         name: 'nowpass',
         components: {Options, Vault, translate, Icon},
         created() {
-
         },
     }
 </script>

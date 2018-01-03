@@ -27,12 +27,11 @@
     // Font Awesome icons
     import 'vue-awesome/icons/spinner'
 
+    /**
+     * Loading dialog
+     */
     export default {
         name: "loading",
         components: {translate, Icon}
     }
 </script>
-
-<style scoped>
-
-</style>
