@@ -2,10 +2,12 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Options from '@/components/Options'
 import Vault from '@/components/Vault'
+import Notes from '@/components/Notes'
 import Popup from '@/components/Popup'
 import Unlock from '@/components/Unlock'
 import Lab from '@/components/Lab'
 import Insert from '@/components/Insert'
+import Store from '@/components/Store'
 
 Vue.use(Router)
 
@@ -18,6 +20,11 @@ export default new Router({
             path: '/',
             name: 'nowpass Vault',
             component: Vault
+        },
+        {
+            path: '/notes',
+            name: 'Notes',
+            component: Notes
         },
         {
             path: '/options',
@@ -39,6 +46,10 @@ export default new Router({
         {
             path: '/insert/:url',
             component: Insert
+        },
+        {
+            path: '/store/:url',
+            component: Store
         }
     ]
 })

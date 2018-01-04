@@ -42,8 +42,6 @@ export default {
             let bs = 32;
             let hash = sha256.create();
 
-            this.passphrase = 'secure';
-
             // We need the digest
             let key = hash.update(passphrase).digest();
 
@@ -78,3 +76,4 @@ export default {
         }
     }
 }
+

@@ -3,19 +3,32 @@
 
         <div class="container-fluid">
             <div class="row">
-                <div id="nowpass-menu" class="col-md-2" v-if="$route.path !== '/popup' && !$route.path.startsWith('/insert/')">
+                <div id="nowpass-menu" class="col-sm-2" v-once v-if="hasMenu()">
                     <div class="list-group">
                         <div id="nowpass-logo" class="text-center">
                             <icon name="unlock-alt" scale="3"></icon>
                         </div>
 
-                        <router-link to="/" class="list-group-item list-group-item-light">Vault</router-link>
-                        <router-link to="/options" class="list-group-item list-group-item-light">Options</router-link>
+                        <router-link to="/" class="list-group-item list-group-item-light">
+                            <translate v-once :word="'vault'"/>
+                        </router-link>
+                        <router-link to="/notes" class="list-group-item list-group-item-light">
+                            <translate v-once :word="'secure_notes'"/>
+                        </router-link>
+                        <router-link to="/options" class="list-group-item list-group-item-light">
+                            <translate v-once :word="'options'"/>
+                        </router-link>
                         <!-- DEV -->
-                        <router-link to="/popup" class="list-group-item list-group-item-light">Popup (DEV)</router-link>
+                        <div v-if="isDev" class="dev-menu">
+                            <h3>Development</h3>
+                            <router-link to="/popup" class="list-group-item list-group-item-light">Extension Popup</router-link>
+                            <router-link to="/insert/test.de" class="list-group-item list-group-item-light">Insert Popup</router-link>
+                            <router-link to="/store/test.de" class="list-group-item list-group-item-light">Store Popup</router-link>
+                            <router-link to="/lab" class="list-group-item list-group-item-light">Labs (Scrap pad)</router-link>
+                        </div>
                     </div>
                 </div>
-                <div id="nowpass-content" class="col-md-10">
+                <div id="nowpass-content" class="col-sm-10">
                     <!-- Content -->
                     <router-view></router-view>
                 </div>
@@ -45,6 +58,25 @@
         components: {Options, Vault, translate, Icon},
         created() {
         },
+        methods: {
+            hasMenu: function () {
+                const excludes = ['/popup', '/insert/', '/store/'];
+
+                for (let exclude of excludes) {
+
+                    if (this.$route.path.startsWith(exclude)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            },
+        },
+        data() {
+            return {
+                isDev: process.env.NODE_ENV === 'development',
+            }
+        }
     }
 </script>
 
@@ -121,6 +153,11 @@
         /** Fast hack **/
         background: #818182 !important;
         color: #fff !important;
+    }
+
+    .dev-menu h3 {
+        color: #fff;
+        margin-top: 20px;
     }
 </style>
 

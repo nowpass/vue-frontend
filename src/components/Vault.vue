@@ -4,7 +4,10 @@
         <div class="container-fluid text-left">
             <div id="header" class="text-left row">
                 <div class="col-9">
-                    <h3>nowpass Password Manager</h3>
+                    <h3>
+                        nowpass Password Manager -
+                        <translate v-once :word="'vault'"/>
+                    </h3>
                 </div>
                 <div class="col-3 text-right">
                     <!-- TODO Add debounce -->
@@ -199,7 +202,7 @@
                             </select>
                         </div>
 
-                        <div v-if="pages > 1" id="pagination" class="col-8">
+                        <div v-if="pages > 1" id="pagination" class="col-7">
                             <button v-if="currentPage > 1" v-on:click.prevent="goToPage(currentPage - 1)"
                                     class="btn btn-default btn-sm">
                                 <
@@ -215,7 +218,7 @@
                                 >
                             </button>
                         </div>
-                        <div class="col-2 text-right" v-bind:class="pages === 1 ? 'offset-sm-8' : ''">
+                        <div class="col-3 text-right" v-bind:class="pages === 1 ? 'offset-sm-7' : ''">
                             <translate :word="'showing'"/>
                             {{elements.length}} / {{total}}
                         </div>
@@ -247,9 +250,6 @@
                                 </button>
                                 <button class="btn btn-default list-group-item list-group-item-action">
                                   Identity
-                                </button>
-                                <button class="btn btn-default list-group-item list-group-item-action">
-                                  Note
                                 </button>
                                 -->
                             </div>
@@ -444,6 +444,9 @@
                     vm.toggleLoading();
                 }).catch(function (error) {
                     console.log(error);
+
+                    // Redirect
+                    vm.$router.push('/Options');
                 });
             },
 
