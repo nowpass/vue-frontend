@@ -8,6 +8,7 @@ import Unlock from '@/components/Unlock'
 import Lab from '@/components/Lab'
 import Insert from '@/components/Insert'
 import Store from '@/components/Store'
+import Generate from '@/components/Generate'
 
 Vue.use(Router)
 
@@ -50,6 +51,11 @@ export default new Router({
         {
             path: '/store/:url',
             component: Store
-        }
+        },
+        {
+            path: '/generate',
+            name: 'nowpass Generator',
+            component: Generate
+        },
     ]
 })

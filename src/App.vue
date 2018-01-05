@@ -25,6 +25,7 @@
                             <router-link to="/insert/test.de" class="list-group-item list-group-item-light">Insert Popup</router-link>
                             <router-link to="/store/test.de" class="list-group-item list-group-item-light">Store Popup</router-link>
                             <router-link to="/lab" class="list-group-item list-group-item-light">Labs (Scrap pad)</router-link>
+                            <router-link to="/generate" class="list-group-item list-group-item-light">Generate</router-link>
                         </div>
                     </div>
                 </div>

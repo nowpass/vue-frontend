@@ -16,7 +16,7 @@
                 </div>
             </div>
 
-            <div id="note-list" class="list-group">
+            <div id="notes-list" class="list-group">
                 <div id="notes-header" class="list-group-item active">
                     <div class="row align-items-center">
 
@@ -41,7 +41,7 @@
                     </div>
                 </div>
 
-                <div id="elements-body">
+                <div id="notes-body">
                     <div v-for="note in notes"
                          class="single-note list-group-item"
                          v-bind:id="'note-' + note.id">
@@ -480,20 +480,21 @@
         color: #fff;
     }
 
-    .note-element {
+    .edit-note {
         border-top: 1px solid #ccc;
         margin-top: 8px;
     }
 
-    .info-element {
+    .info-note {
         cursor: pointer;
     }
 
-    .dialog {
-        z-index: 9;
+    .edit-row {
+        margin-left: -1.25rem;
+        margin-right: -1.25rem;
     }
 
-    #note-element-container {
+    #edit-note-container {
         background: #f1f1f1;
         padding: 10px;
     }
