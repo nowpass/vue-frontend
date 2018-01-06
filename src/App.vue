@@ -61,7 +61,7 @@
         },
         methods: {
             hasMenu: function () {
-                const excludes = ['/popup', '/insert/', '/store/'];
+                const excludes = ['/popup', '/insert/', '/store/', '/generate'];
 
                 for (let exclude of excludes) {
 

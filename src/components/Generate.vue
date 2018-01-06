@@ -1,5 +1,5 @@
 <template>
-    <div id="generate" class="now-modal now-fade">
+    <div id="generate" v-bind:class="isUsedIntern ? 'now-modal now-fade' : ''">
         <div class="now-modal-inner">
             <div class="now-modal-title">
                 <h4>
@@ -73,7 +73,6 @@
     // Font Awesome icons
     import 'vue-awesome/icons/refresh'
 
-
     /**
      * Unlocks the passphrase
      */
@@ -108,15 +107,16 @@
                     chars += this.SPECIAL;
                 }
 
-                // Let's use the crypto Browser API
+                // Crypto Browser API for real random
                 let crypto = window.crypto || window.msCrypto; // for IE 11
                 let randomNumbers = new Uint8Array(this.generatorLength);
 
                 // Get a set of random numbers (0-255)
                 crypto.getRandomValues(randomNumbers);
 
+                // Only using ASCII chars atm
                 for (let i = 0; i < this.generatorLength; i++) {
-                    password += chars.charAt(Math.floor((randomNumbers[i] / 256) * chars.length));
+                    password += chars.charAt(Math.floor((randomNumbers[i] / 256) * (chars.length - 1)));
                 }
 
                 return password;
@@ -129,7 +129,7 @@
                 this.generatedPassword = "";
 
                 // Used in vault etc. on the extension itself (not in an iframe)
-                if (this.$route.path !== '/generate') {
+                if (this.isUsedIntern) {
                     this.$emit('use_generated', this.generatedPassword);
                     return;
                 }
@@ -151,7 +151,7 @@
             
             use: function () {
                 // Used in vault etc. on the extension itself (not in an iframe)
-                if (this.$route.path !== '/generate') {
+                if (this.isUsedIntern) {
                     this.$emit('use_generated', this.generatedPassword);
                     return;
                 }
@@ -174,13 +174,14 @@
         },
         data() {
             return {
-                // Generator Popup
+                isUsedIntern: this.$route.path === '/generate' ? false : true,
+
+                // Generator
                 isGeneratorPopupActive: false,
                 generatorNumbers: true,
                 generatorSpecial: true,
                 generatorLength: 13,
                 generatedPassword: '',
-
 
                 // TODO move to constant export
                 LOWER_CHARS: 'abcdefghijklmnopqrstuvwxyz',
@@ -191,3 +192,9 @@
         }
     }
 </script>
+
+<style>
+    #generate label {
+        margin-bottom: .1rem;
+    }
+</style>
