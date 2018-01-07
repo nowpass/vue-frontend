@@ -4,7 +4,7 @@
             <div id="header" class="text-left row">
                 <div class="col-12">
                     <h3>
-                        nowpass Password Manager - <translate v-once :word="'nowpassOption'" />
+                        <translate v-once :word="'nowpassOption'" />
                     </h3>
                 </div>
             </div>

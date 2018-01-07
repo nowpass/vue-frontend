@@ -6,26 +6,29 @@
                 <div id="nowpass-menu" class="col-sm-2" v-once v-if="hasMenu()">
                     <div class="list-group">
                         <div id="nowpass-logo" class="text-center">
-                            <icon name="unlock-alt" scale="3"></icon>
+                            <img src="./assets/nowpass-logo-transparent-300px.png">
                         </div>
 
-                        <router-link to="/" class="list-group-item list-group-item-light">
+                        <router-link to="/" class="list-group-item">
+                            <icon name="lock"></icon>
                             <translate v-once :word="'vault'"/>
                         </router-link>
-                        <router-link to="/notes" class="list-group-item list-group-item-light">
+                        <router-link to="/notes" class="list-group-item">
+                            <icon name="sticky-note-o"></icon>
                             <translate v-once :word="'secure_notes'"/>
                         </router-link>
-                        <router-link to="/options" class="list-group-item list-group-item-light">
+                        <router-link to="/options" class="list-group-item">
+                            <icon name="cog"></icon>
                             <translate v-once :word="'options'"/>
                         </router-link>
                         <!-- DEV -->
-                        <div v-if="isDev" class="dev-menu">
+                        <div v-once v-if="isDev" class="dev-menu">
                             <h3>Development</h3>
-                            <router-link to="/popup" class="list-group-item list-group-item-light">Extension Popup</router-link>
-                            <router-link to="/insert/test.de" class="list-group-item list-group-item-light">Insert Popup</router-link>
-                            <router-link to="/store/test.de" class="list-group-item list-group-item-light">Store Popup</router-link>
-                            <router-link to="/lab" class="list-group-item list-group-item-light">Labs (Scrap pad)</router-link>
-                            <router-link to="/generate" class="list-group-item list-group-item-light">Generate</router-link>
+                            <router-link to="/popup" class="list-group-item">Extension Popup</router-link>
+                            <router-link to="/insert/test.de" class="list-group-item">Insert Popup</router-link>
+                            <router-link to="/store/test.de" class="list-group-item">Store Popup</router-link>
+                            <router-link to="/lab" class="list-group-item">Labs (Scrap pad)</router-link>
+                            <router-link to="/generate" class="list-group-item">Generate</router-link>
                         </div>
                     </div>
                 </div>
@@ -49,7 +52,9 @@
     import Icon from 'vue-awesome/components/Icon'
 
     // Icons Font-Awesome
-    import 'vue-awesome/icons/unlock-alt'
+    import 'vue-awesome/icons/lock'
+    import 'vue-awesome/icons/sticky-note-o'
+    import 'vue-awesome/icons/cog'
 
     /**
      * Entry point (mostly just an skeleton, logic is in the components)
@@ -85,10 +90,11 @@
     #nowpass {
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+        background: #eff3f8;
     }
 
     #nowpass-menu {
-        background: #3f3f3f;
+        background: rgb(54, 62, 70);
         min-height: 100vh;
         padding: 0;
     }
@@ -98,10 +104,43 @@
         padding-right: 0;
     }
 
+    #nowpass-menu .list-group-item {
+        border: 0;
+        border-radius: 0;
+        background: rgb(54, 62, 70);
+        padding: 1rem 1.25rem;
+        color: #fff;
+    }
+
+    #nowpass-menu a.list-group-item:hover {
+        background: rgb(18, 132, 184);
+        color: #fff;
+    }
+
+    #nowpass-menu .router-link-exact-active {
+        background: rgb(91, 100, 108);
+        color: #fff;
+    }
+
+    #nowpass-menu .fa-icon {
+        color: #888;
+        display: inline-block;
+
+        width: auto;
+        height: 1rem; /* or any other relative font sizes */
+
+        /* You would have to include the following two lines to make this work in Safari */
+        max-width: 100%;
+        max-height: 100%;
+        margin-right: 7px;
+    }
+
     #header {
         margin-bottom: 17px;
-        padding: 10px 15px 0 15px;
-        background: #f1f1f1;
+        padding: 14px 15px 0 15px;
+        height: 60px;
+        background: #fff;
+        border-bottom: 1px solid #ccc;
     }
 
     #header h3 {
@@ -109,8 +148,15 @@
     }
 
     #nowpass-logo {
-        padding: 5px
+        padding: 5px;
+        background: #fff;
+        border-bottom: 1px solid #ccc;
     }
+
+    #nowpass-logo img {
+        max-width: 95%;
+    }
+
 
     /* Bootstrap Modals suck */
     .now-fade {
@@ -150,16 +196,16 @@
         border-top: 1px solid #ccc;
     }
 
-    .router-link-exact-active {
-        /** Fast hack **/
-        background: #818182 !important;
-        color: #fff !important;
-    }
-
     .dev-menu h3 {
         color: #fff;
         margin-top: 20px;
     }
+
+    /** Common styles */
+    #nowpass .list-group-item {
+        border-radius: 0;
+    }
+
 </style>
 
 <style lang="scss">

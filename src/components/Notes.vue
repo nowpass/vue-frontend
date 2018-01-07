@@ -5,7 +5,6 @@
             <div id="header" class="text-left row">
                 <div class="col-9">
                     <h3>
-                        nowpass Password Manager -
                         <translate v-once :word="'notes'"/>
                     </h3>
                 </div>

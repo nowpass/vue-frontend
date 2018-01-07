@@ -5,7 +5,6 @@
             <div id="header" class="text-left row">
                 <div class="col-9">
                     <h3>
-                        nowpass Password Manager -
                         <translate v-once :word="'vault'"/>
                     </h3>
                 </div>
@@ -17,7 +16,7 @@
             </div>
 
             <div id="elements" class="list-group">
-                <div id="elements-header" class="list-group-item active">
+                <div id="elements-header" class="list-group-item">
                     <div class="row align-items-center">
                         <div class="col-md-1">
                         </div>
@@ -189,7 +188,7 @@
                     </div>
                 </div><!-- //body-->
 
-                <div id="elements-footer" class="text-center list-group-item active">
+                <div id="elements-footer" class="text-center list-group-item">
                     <div class="row align-items-center">
                         <div class="col-2 text-left">
                             <select v-model="limit" v-on:change="resetPage().loadElements()">
@@ -208,7 +207,7 @@
                                 <
                             </button>
                             <button v-for="page in pages"
-                                    v-bind:class="page === currentPage ? 'btn-success' : ''"
+                                    v-bind:class="page === currentPage ? 'btn-primary' : ''"
                                     v-on:click.prevent="goToPage(page)"
                                     class="btn btn-default btn-sm">
                                 {{page}}
@@ -823,7 +822,6 @@
 
 <style>
     #elements-header a {
-        color: #fff;
     }
 
     .edit-element {
@@ -845,13 +843,15 @@
     }
 
     #login-new {
-        background: #f1f1f1;
-        border-radius: 5px;
+        background: #fff;
         padding: 5px;
+        border: 1px solid #ccc;
+        margin-bottom: 15px;
     }
 
     #edit-element-container {
-        background: #f1f1f1;
+        background: #f9f9f9;
         padding: 10px;
+        margin-bottom: -0.75rem;
     }
 </style>

@@ -105,7 +105,7 @@
 
 <style>
     #login {
-        background: #f1f1f1;
+        background: #fff;
         padding: 10px;
     }
 </style>
