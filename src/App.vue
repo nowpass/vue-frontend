@@ -151,12 +151,13 @@
         padding: 5px;
         background: #fff;
         border-bottom: 1px solid #ccc;
+        height: 60px;
     }
 
     #nowpass-logo img {
         max-width: 95%;
+        max-height: 55px;
     }
-
 
     /* Bootstrap Modals suck */
     .now-fade {

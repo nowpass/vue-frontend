@@ -16,7 +16,7 @@
             </div>
 
             <div id="notes-list" class="list-group">
-                <div id="notes-header" class="list-group-item active">
+                <div id="notes-header" class="list-group-item">
                     <div class="row align-items-center">
 
                         <div class="col-md-5">
@@ -103,7 +103,7 @@
 
                 </div><!-- //body-->
 
-                <div id="notes-footer" class="text-center list-group-item active">
+                <div id="notes-footer" class="text-center list-group-item">
                     <div class="row align-items-center">
                         <div class="col-2 text-left">
                             <select v-model="limit" v-on:change="resetPage().loadNotes()">
@@ -475,10 +475,6 @@
 </script>
 
 <style>
-    #notes-header a {
-        color: #fff;
-    }
-
     .edit-note {
         border-top: 1px solid #ccc;
         margin-top: 8px;
@@ -494,7 +490,7 @@
     }
 
     #edit-note-container {
-        background: #f1f1f1;
+        background: #f9f9f9;
         padding: 10px;
     }
 </style>
