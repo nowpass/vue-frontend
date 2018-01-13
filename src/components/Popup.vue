@@ -43,7 +43,7 @@
             </router-link>
         </div>
         <div class="list-group-item">
-            <router-link to="/generate-password">
+            <router-link to="/generate">
                 <icon name="random"></icon>
                 <translate v-once :word="'generate_password'"/>
             </router-link>
