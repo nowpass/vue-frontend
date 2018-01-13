@@ -103,44 +103,9 @@
 
                 </div><!-- //body-->
 
-                <div id="notes-footer" class="text-center list-group-item">
-                    <div class="row align-items-center">
-                        <div class="col-2 text-left">
-                            <select v-model="limit" v-on:change="resetPage().loadNotes()">
-                                <option value="3">3</option>
-                                <option value="5">5</option>
-                                <option value="10">10</option>
-                                <option value="20">20</option>
-                                <option value="50">50</option>
-                                <option value="100">100</option>
-                            </select>
-                        </div>
-
-                        <div v-if="pages > 1" id="pagination" class="col-8">
-                            <button v-if="currentPage > 1" v-on:click.prevent="goToPage(currentPage - 1)"
-                                    class="btn btn-default btn-sm">
-                                <
-                            </button>
-                            <button v-for="page in pages"
-                                    v-bind:class="page === currentPage ? 'btn-success' : ''"
-                                    v-on:click.prevent="goToPage(page)"
-                                    class="btn btn-default btn-sm">
-                                {{page}}
-                            </button>
-                            <button v-if="(currentPage) * limit < total" class="btn btn-default btn-sm"
-                                    v-on:click.prevent="goToPage(currentPage + 1)">
-                                >
-                            </button>
-                        </div>
-                        <div class="col-2 text-right" v-bind:class="pages === 1 ? 'offset-sm-8' : ''">
-                            <translate :word="'showing'"/>
-                            {{notes.length}} / {{total}}
-                        </div>
-                    </div>
-                </div>
+                <pagination :limit="limit" :currentPage="currentPage" :itemsLength="notes.length" :itemsTotal="total"
+                            v-on:changeLimit="changeLimit" v-on:changeCurrentPage="goToPage"/>
             </div><!-- //Notes -->
-
-
         </div> <!-- //Container -->
 
         <div v-if="showUnlock">
@@ -161,10 +126,11 @@
 <script>
     // Components
     import Login from './Login';
-    import translate from './Translate'
+    import translate from './helpers/Translate'
     import Unlock from './Unlock'
     import LoginFirst from "./LoginFirst";
     import Loading from "./Loading";
+    import Pagination from "./parts/Pagination"
 
     // 3rd party
     import axios from 'axios'
@@ -196,7 +162,8 @@
             dropdown,
             translate,
             Login,
-            Unlock
+            Unlock,
+            Pagination
         },
         mixins: [settings, decrypt],
         /**
@@ -254,7 +221,6 @@
                     vm.notes = response.data['notes'];
                     vm.total = parseInt(response.data['total']);
 
-                    vm.calculatePages();
                     vm.toggleLoading();
                 }).catch(function (error) {
                     console.log(error);
@@ -319,17 +285,6 @@
             },
 
             /**
-             * Calculate amount of pages
-             */
-            calculatePages: function () {
-                if (this.total === 0) {
-                    this.pages = 1;
-                }
-
-                this.pages = Math.ceil(this.total / this.limit);
-            },
-
-            /**
              * Go to page
              * @param page {number}
              */
@@ -348,6 +303,17 @@
                 this.currentPage = 1;
 
                 return this;
+            },
+
+            /**
+             * Change the limit and trigger reload
+             *
+             * @param limit {number}
+             */
+            changeLimit: function (limit) {
+                this.limit = limit;
+                this.resetPage();
+                this.loadNotes();
             },
 
             /**
@@ -379,7 +345,6 @@
 
                 this.editNote = note;
             },
-
 
 
             /**
@@ -446,11 +411,9 @@
                 offset: 0,
                 limit: 20,
                 total: 0,
-
-                pages: 1,
                 currentPage: 1,
 
-                countNotes: 0,
+                // Search and Ordering
                 filterSearch: '',
                 orderByASC: false,
                 orderByValue: 'id',

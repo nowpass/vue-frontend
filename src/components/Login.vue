@@ -88,7 +88,7 @@
 </template>
 
 <script>
-    import translate from './Translate'
+    import translate from './helpers/Translate'
 
     /**
      * Login view

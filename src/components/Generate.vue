@@ -23,14 +23,14 @@
                 </div>
 
                 <div class="form-group">
-                    <input id="generator-numbers" type="checkbox" v-model="generatorNumbers"/>
+                    <input id="generator-numbers" type="checkbox" v-model="generatorNumbers" v-on:change="setGeneratedPassword()"/>
                     <label for="generator-numbers">
                         <translate :word="'numbers'"/>
                         (0-9)</label>
                 </div>
 
                 <div class="form-group">
-                    <input id="generator-special" type="checkbox" v-model="generatorSpecial" />
+                    <input id="generator-special" type="checkbox" v-model="generatorSpecial" v-on:change="setGeneratedPassword()"/>
                     <label for="generator-special">
                         <translate :word="'special_characters'"/>
                     </label>
@@ -38,11 +38,11 @@
 
                 <div class="form-group">
                     <label for="generator-length">
-                        <translate :word="'password_length'"/>
+                        <translate :word="'password_length'" />
                         :</label>
                     <div class="input-group">
                         <input type="range" id="generator-length" v-model="generatorLength" min="1" max="50"
-                               class="form-control">
+                               class="form-control" v-on:change="setGeneratedPassword()">
                         <div class="input-group-append">
                             <button class="btn btn-default">{{generatorLength}}</button>
                         </div>
@@ -64,8 +64,15 @@
 </template>
 
 <script>
-    import translate from './Translate'
+    // Components
+    import translate from './helpers/Translate'
+
+    // Mixins
     import settings from '../mixins/settings'
+    import chrome from "../mixins/chrome";
+
+    // Constants
+    import {LOWER_CHARS, SPECIAL, NUMBERS, UPPER_CHARS} from '../const/generator'
 
     // 3rd party
     import Icon from 'vue-awesome/components/Icon'
@@ -79,7 +86,7 @@
     export default {
         name: "generate",
         components: {translate, Icon},
-        mixins: [settings],
+        mixins: [settings, chrome],
         created() {
             this.setGeneratedPassword();
         },
@@ -88,23 +95,23 @@
              * Set the generated password
              */
             setGeneratedPassword: function () {
-                this.generatedPassword = this.generatePassword();
+                this.generatedPassword = this.getGeneratePassword();
             },
 
             /**
              * Generate a random (using window.crypto function of the browser) password with the given settings
              * @returns {string}
              */
-            generatePassword: function () {
+            getGeneratePassword: function () {
                 let password = '';
-                let chars = this.LOWER_CHARS + this.UPPER_CHARS;
+                let chars = LOWER_CHARS + UPPER_CHARS;
 
                 if (this.generatorNumbers) {
-                    chars += this.NUMBERS;
+                    chars += NUMBERS;
                 }
 
                 if (this.generatorSpecial) {
-                    chars += this.SPECIAL;
+                    chars += SPECIAL;
                 }
 
                 // Crypto Browser API for real random
@@ -139,14 +146,7 @@
                     return;
                 }
 
-                let message = {
-                    task: 'generatedClose'
-                };
-
-                chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-                    let lastTabId = tabs[0].id;
-                    chrome.tabs.sendMessage(lastTabId, message);
-                });
+                this.sendBrowserMessage({task: 'generatedClose'});
             },
             
             use: function () {
@@ -161,15 +161,7 @@
                     return;
                 }
 
-                let message = {
-                    task: 'generatedInsert',
-                    generatedPassword: this.generatedPassword
-                };
-
-                chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-                    let lastTabId = tabs[0].id;
-                    chrome.tabs.sendMessage(lastTabId, message);
-                });
+                this.sendBrowserMessage({task: 'generatedInsert', generatedPassword: this.generatedPassword});
             }
         },
         data() {
@@ -182,12 +174,6 @@
                 generatorSpecial: true,
                 generatorLength: 13,
                 generatedPassword: '',
-
-                // TODO move to constant export
-                LOWER_CHARS: 'abcdefghijklmnopqrstuvwxyz',
-                UPPER_CHARS: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-                NUMBERS: '0123456789',
-                SPECIAL: '!"§$&(/)=?@\'+-*#,\\.-_'
             }
         }
     }
@@ -196,5 +182,9 @@
 <style>
     #generate label {
         margin-bottom: .1rem;
+    }
+
+    #nowpass {
+        background: #fff;
     }
 </style>

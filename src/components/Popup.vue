@@ -83,7 +83,7 @@
 
 <script>
     // Components
-    import translate from './Translate'
+    import translate from './helpers/Translate'
     import Unlock from './Unlock'
     import LoginFirst from "./LoginFirst";
     import loading from './Loading'

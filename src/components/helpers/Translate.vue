@@ -1,3 +1,11 @@
+<template>
+    <span v-once>
+          {{translate(word, ucfirst, placeholders)}}
+    </span>
+</template>
+
+<i18n src='../../language/locales_en.json'></i18n>
+
 <script>
     /**
      * Translation helper
@@ -5,11 +13,6 @@
     export default {
         name: "translate",
         props: ['word', 'ucfirst', 'placeholders'],
-        template: '\
-        <span v-once>\
-          {{translate(word, ucfirst, placeholders)}} \
-        </span>\
-        ',
         methods: {
             /**
              * Translate a string (in dev just add ##), else against the chrome.i18n API
@@ -20,11 +23,7 @@
              */
             translate(string, ucfirst=false, placeholders) {
                 if (process.env.NODE_ENV === 'development') {
-                    if (ucfirst) {
-                        string = string.charAt(0).toUpperCase() + string.slice(1);
-                    }
-
-                    return '##' + string + '##'
+                    return this.$t(string)
                 }
 
                 let trans = '';

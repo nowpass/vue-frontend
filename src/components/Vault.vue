@@ -48,7 +48,7 @@
                     <div v-for="element in elements"
                          class="single-element list-group-item"
                          v-bind:id="'element-' + element.id">
-                        <div class="row info-element align-items-center" v-on:click="showElement(element)">
+                        <div class="row info-element align-items-center" v-on:click="showElement(element)" v-on:contextmenu.prevent="$refs.elementContextMenu.open($event, {element: element})">
                             <div class="col-md-1">
                                 <icon v-bind:name="iconMapping[element.kind]"></icon>
                             </div>
@@ -77,7 +77,7 @@
                                         </button>
                                         <button v-if="element.unlocked" class="btn btn-primary"
                                                 v-on:click.stop.prevent="hidePassword(element)">
-                                            <translate :word="'hide'"/>
+                                            Hide
                                         </button>
                                     </div>
                                 </div>
@@ -188,41 +188,10 @@
                     </div>
                 </div><!-- //body-->
 
-                <div id="elements-footer" class="text-center list-group-item">
-                    <div class="row align-items-center">
-                        <div class="col-2 text-left">
-                            <select v-model="limit" v-on:change="resetPage().loadElements()">
-                                <option value="3">3</option>
-                                <option value="5">5</option>
-                                <option value="10">10</option>
-                                <option value="20">20</option>
-                                <option value="50">50</option>
-                                <option value="100">100</option>
-                            </select>
-                        </div>
+                <pagination :limit="limit" :currentPage="currentPage" :itemsLength="elements.length" :itemsTotal="total"
+                            v-on:changeLimit="changeLimit" v-on:changeCurrentPage="goToPage"/>
 
-                        <div v-if="pages > 1" id="pagination" class="col-7">
-                            <button v-if="currentPage > 1" v-on:click.prevent="goToPage(currentPage - 1)"
-                                    class="btn btn-default btn-sm">
-                                <
-                            </button>
-                            <button v-for="page in pages"
-                                    v-bind:class="page === currentPage ? 'btn-primary' : ''"
-                                    v-on:click.prevent="goToPage(page)"
-                                    class="btn btn-default btn-sm">
-                                {{page}}
-                            </button>
-                            <button v-if="(currentPage) * limit < total" class="btn btn-default btn-sm"
-                                    v-on:click.prevent="goToPage(currentPage + 1)">
-                                >
-                            </button>
-                        </div>
-                        <div class="col-3 text-right" v-bind:class="pages === 1 ? 'offset-sm-7' : ''">
-                            <translate :word="'showing'"/>
-                            {{elements.length}} / {{total}}
-                        </div>
-                    </div>
-                </div>
+
             </div><!-- //Elements -->
 
             <div id="element-create">
@@ -338,13 +307,22 @@
             <login-first v-once></login-first>
         </div>
 
+        <context-menu id="element-context" ref="elementContextMenu" @ctx-open="onElementContextMenu"  @ctx-cancel="resetElementContextMenu">
+            <li v-on:click="deleteElement($event, menuData)">
+                <translate :word="'delete_element'"/>
+            </li>
+            <li>
+                <translate :word="'duplicate_element'"/>
+            </li>
+        </context-menu>
+
     </div><!-- //App -->
 </template>
 
 <script>
     // Components
     import Login from './Login';
-    import translate from './Translate'
+    import translate from './helpers/Translate'
     import Unlock from './Unlock'
     import LoginFirst from "./LoginFirst";
 
@@ -352,10 +330,14 @@
     import axios from 'axios'
     import Icon from 'vue-awesome/components/Icon'
     import dropdown from 'vue-my-dropdown';
+    import contextMenu from 'vue-context-menu'
 
     // Mixins
     import settings from '../mixins/settings';
     import decrypt from '../mixins/decrypt'
+
+    // Modules
+    import ApiElements from '../modules/api-elements'
 
     // Font Awesome icons
     import 'vue-awesome/icons/user-circle'
@@ -364,6 +346,7 @@
     import 'vue-awesome/icons/plus-circle'
     import 'vue-awesome/icons/spinner'
     import Loading from "./Loading";
+    import Pagination from "./parts/Pagination";
 
     /**
      * Main Management for Elements (except Notes)
@@ -371,13 +354,16 @@
     export default {
         name: 'nowpass',
         components: {
+            Pagination,
             Loading,
             LoginFirst,
-            Icon,
             dropdown,
             translate,
             Login,
-            Unlock
+            Unlock,
+            // 3rd party
+            Icon,
+            contextMenu
         },
         mixins: [settings, decrypt],
         /**
@@ -393,65 +379,42 @@
         },
         methods: {
             /**
-             * Load the Elements into the table (promise) - API key needs to be set
+             * Trigger loading the Elements into the table (promise) - API key needs to be set
              */
             loadElements: function () {
                 this.toggleLoading();
 
-                // Base URL (TODO move to mixin const)
-                let url = this.apiUrl + '/api/v1/elements';
+                let filters = {
+                    filterSearch: this.filterSearch,
+                    orderBy: this.orderByValue + ' ' + (this.orderByASC ? 'ASC' : 'DESC'),
+                    offset: this.offset,
+                    limit: this.limit
+                };
 
-                let parts = [];
-
-                // Filter Search
-                if (this.filterSearch !== '') {
-                    parts.push('search=' + this.filterSearch);
-                }
-
-                // Add Ordering
-                parts.push('order_by=' + this.orderByValue + ' ' + (this.orderByASC ? 'ASC' : 'DESC'));
-
-                // Limit / Ofset
-                parts.push('offset=' + this.offset);
-                parts.push('limit=' + this.limit);
-
-                // Build URL (TODO optimize)
-                for (let i = 0; i < parts.length; i++) {
-                    let glue = (i === 0) ? '?' : '&';
-
-                    url += glue + parts[i];
-                }
-
-                // Encode possible special chars
-                url = encodeURI(url);
-
-                // Query complete
-                console.log('Querying ' + url);
-
-                // Reference
-                var vm = this;
-
-                axios({
-                    method: 'get',
-                    url: url,
-                    headers: {'api-key': this.apiKey},
-                }).then(function (response) {
-                    vm.elements = response.data['elements'];
-                    vm.total = parseInt(response.data['total']);
-
-                    vm.calculatePages();
-                    vm.toggleLoading();
-                }).catch(function (error) {
-                    console.log(error);
-
-                    // Redirect
-                    vm.$router.push('/Options');
-                });
+                this.apiElements.load(filters, this.resolveElements, this.failElements)
             },
 
             /**
-             * Save an element
-             * @param saveElement
+             * Resolve the response for load Elements
+             */
+            resolveElements: function (response) {
+                this.elements = response.data['elements'];
+                this.total = parseInt(response.data['total']);
+
+                this.toggleLoading();
+            },
+
+            /**
+             * Fail for load Elements
+             */
+            failElements: function (error) {
+                console.log(error);
+
+                // TODO
+            },
+
+            /**
+             * Store an element
              */
             saveElement: function (saveElement) {
                 if (!this.passphrase) {
@@ -461,63 +424,30 @@
                     return;
                 }
 
-                // Clone element, as we have to delete things (like clear text password)
-                let element = JSON.parse(JSON.stringify(saveElement));
-
-                let method = 'post';
-
-                // Base URL (TODO move to const)
-                let url = this.apiUrl + '/api/v1/elements';
-
-                // Update
-                if (element.id) {
-                    method = 'patch';
-                    url = url + '/' + element.id;
+                // Let's make sure the password is encrypted.. TODO check if that causes unwanted changes
+                if (saveElement.clearPassword) {
+                    saveElement.password = this.encrypt(saveElement.clearPassword, this.passphrase);
                 }
 
-                // Let's make sure the password is encrypted..
-                if (element.clearPassword) {
-                    element.password = this.encrypt(element.clearPassword, this.passphrase);
-                }
-
-                delete(element.clearPassword);
-                delete(element.unlocked);
-
-                // Make sure no spaces are left
-                element.title = element.title.trim();
-
-                // Reference
-                var vm = this;
-
-                axios.defaults.headers['Content-Type'] = 'application/vnd.api+json';
-                axios.defaults.headers['Accept'] = 'application/vnd.api+json';
-
-                axios({
-                    method: method,
-                    url: url,
-                    headers: {'api-key': this.apiKey},
-                    data: JSON.stringify(element)
-                }).then(function (response) {
-                    // Trigger reload
-                    vm.newElement = {};
-                    vm.isShowNewLogin = false;
-
-                    vm.loadElements();
-                }).catch(function (error) {
-                    // TODO handle error
-                    console.log(error);
-                });
+                this.apiElements.store(saveElement, this.resolveSaveElement, this.failSaveElement)
             },
 
             /**
-             * Calculate amount of pages
+             *  Resolve the saving of an element (e.g. trigger reload)
              */
-            calculatePages: function () {
-                if (this.total === 0) {
-                    this.pages = 1;
-                }
+            resolveSaveElement(response) {
+                this.newElement = {};
+                this.isShowNewLogin = false;
 
-                this.pages = Math.ceil(this.total / this.limit);
+                this.loadElements();
+            },
+
+            /**
+             *  Error handling for failed saving
+             */
+            failSaveElement(error) {
+                // TODO handle error
+                console.log(error);
             },
 
             /**
@@ -527,6 +457,17 @@
             goToPage: function (page) {
                 this.offset = (page - 1) * this.limit;
                 this.currentPage = page;
+                this.loadElements();
+            },
+
+            /**
+             * Change the limit and trigger reload
+             *
+             * @param limit {number}
+             */
+            changeLimit: function (limit) {
+                this.limit = limit;
+                this.resetPage();
                 this.loadElements();
             },
 
@@ -637,7 +578,7 @@
                 this.isGeneratorPopupActive = true;
 
                 // Generate a new password
-                this.generatedPassword = this.generatePassword();
+                this.generatedPassword = this.getGeneratePassword();
             },
 
             /**
@@ -665,14 +606,14 @@
              * Set the generated password
              */
             setGeneratedPassword: function () {
-                this.generatedPassword = this.generatePassword();
+                this.generatedPassword = this.getGeneratePassword();
             },
 
             /**
              * Generate a random (using window.crypto function of the browser) password with the given settings
              * @returns {string}
              */
-            generatePassword: function () {
+            getGeneratePassword: function () {
                 let password = '';
                 let chars = this.LOWER_CHARS + this.UPPER_CHARS;
 
@@ -708,7 +649,7 @@
                     username: '',
                     password: '',
                     unlocked: true,
-                    clearPassword: this.generatePassword(),
+                    clearPassword: this.getGeneratePassword(),
                     comment: ''
                 };
 
@@ -745,11 +686,26 @@
 
                 // Return
                 this.showGenerator(activeElement);
-            }
+            },
+
+            deleteElement(evt, data) {
+                this.apiElements.delete(data.element.id, (result) => {this.loadElements()}, (error) => {console.log(error)})
+            },
+
+            // Context menu
+            onElementContextMenu(locals) {
+                console.log('open', locals)
+                this.menuData = locals
+            },
+
+            resetElementContextMenu() {
+                this.menuData = newMenuData()
+            },
+
         },
         data() {
             return {
-                apiUrl: this.getSetting('apiUrl', ''),
+                apiElements: new ApiElements(this.getSetting('apiUrl', ''), this.getSetting('apiKey', '')),
                 apiKey: this.getSetting('apiKey', ''),
                 showLoginFirst: false,
 
@@ -762,11 +718,9 @@
                 offset: 0,
                 limit: 20,
                 total: 0,
-
-                pages: 1,
                 currentPage: 1,
 
-                countElements: 0,
+                // Search and Ordering
                 filterSearch: '',
                 orderByASC: false,
                 orderByValue: 'id',

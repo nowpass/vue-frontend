@@ -37,8 +37,12 @@
 </template>
 
 <script>
-    import translate from './Translate'
+    // Components
+    import translate from './helpers/Translate'
+
+    // Mixins
     import settings from '../mixins/settings'
+    import chrome from "../mixins/chrome";
 
     /**
      * Unlocks the passphrase
@@ -47,7 +51,7 @@
         name: "unlock",
         props: ['element', 'task'],
         components: {translate},
-        mixins: [settings],
+        mixins: [settings, chrome],
         methods: {
             /**
              * Emit update_passphrase event to parent
@@ -78,9 +82,7 @@
                     return;
                 }
 
-                chrome.tabs.getCurrent(function(tab) {
-                    chrome.tabs.remove(tab.id, function() { });
-                });
+                this.closeCurrentBrowserTab();
             },
             /**
              * Emit update_passphrase event with empty passphrase
@@ -98,9 +100,7 @@
                     return;
                 }
 
-                chrome.tabs.getCurrent(function(tab) {
-                    chrome.tabs.remove(tab.id, function() { });
-                });
+                this.closeCurrentBrowserTab();
             }
         },
         data() {

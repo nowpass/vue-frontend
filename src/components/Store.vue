@@ -43,13 +43,14 @@
 
 <script>
     // Components
-    import translate from './Translate'
+    import translate from './helpers/Translate'
     import loading from './Loading'
 
     // Mixins
     import settings from '../mixins/settings'
     import decrypt from '../mixins/decrypt'
     import formparse from '../mixins/formparse'
+    import chrome from '../mixins/chrome'
 
     // 3rd party
     import axios from 'axios'
@@ -65,7 +66,7 @@
             loading,
             Icon
         },
-        mixins: [settings, decrypt, formparse],
+        mixins: [settings, decrypt, formparse, chrome],
         created() {
             if (!this.postData) {
                 console.log('NO POST data');
@@ -225,12 +226,7 @@
             },
 
             sendClosePopup: function () {
-                chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-                    let lastTabId = tabs[0].id;
-                    chrome.tabs.sendMessage(lastTabId, {
-                        task: 'closePopup',
-                    });
-                });
+                this.sendBrowserMessage({task: 'insertClose'});
             }
         },
         data() {

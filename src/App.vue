@@ -3,7 +3,7 @@
 
         <div class="container-fluid">
             <div class="row">
-                <div id="nowpass-menu" class="col-sm-2" v-once v-if="hasMenu()">
+                <div id="nowpass-menu" v-once v-if="hasMenu()" v-bind:class="hasMenu() ? 'col-sm-2' : ''">
                     <div class="list-group">
                         <div id="nowpass-logo" class="text-center">
                             <img src="./assets/nowpass-logo-transparent-300px.png">
@@ -32,8 +32,7 @@
                         </div>
                     </div>
                 </div>
-                <div id="nowpass-content" class="col-sm-10">
-                    <!-- Content -->
+                <div id="nowpass-content" v-bind:class="hasMenu() ? 'col-sm-10' : 'col-sm-12'">
                     <router-view></router-view>
                 </div>
             </div>
@@ -44,7 +43,7 @@
 
 <script>
     // Components
-    import translate from './components/Translate'
+    import translate from './components/helpers/Translate'
     import Options from './components/Options';
     import Vault from './components/Vault';
 
@@ -205,6 +204,15 @@
     /** Common styles */
     #nowpass .list-group-item {
         border-radius: 0;
+    }
+
+    /* Context menu */
+    .ctx-menu-container li {
+        padding: 5px 15px;
+    }
+
+    .ctx-menu-container li:hover {
+        background: #f1f1f1;
     }
 
 </style>

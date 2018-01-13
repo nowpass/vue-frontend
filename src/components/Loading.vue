@@ -19,7 +19,7 @@
 
 <script>
     // Components
-    import translate from './Translate'
+    import translate from './helpers/Translate'
 
     // 3rd party
     import Icon from 'vue-awesome/components/Icon'

@@ -80,7 +80,7 @@
 </template>
 
 <script>
-    import translate from './Translate'
+    import translate from './helpers/Translate'
     import settings from '../mixins/settings'
     import axios from 'axios'
 
