@@ -9,7 +9,7 @@
                 </div>
             </div>
 
-            <div id="content">
+            <div id="content" class="list-group-item">
                 <div class="alert alert-warning" v-if="errorMsg">
                     <h3>
                         <translate v-once :word="'validation_failed'" />

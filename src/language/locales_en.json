@@ -1,8 +1,8 @@
 {
   "en": {
-    "extName": "nowpass Password Manager",
+    "extName": "NOWPASS Password Manager",
     "extDesc": "Open-Source password management.",
-    "ext_default_title": "nowpass",
+    "ext_default_title": "NOWPASS",
     "direction": "ltr",
     "save": "Save and Login",
     "saveStatus": "Options saved",
@@ -57,6 +57,8 @@
     "fetchError": "Error: Failed to connect to nowpass API.",
     "content": "Content",
     "delete_element": "Delete Element",
-    "duplicate_element": "Duplicate Element"
+    "duplicate_element": "Duplicate Element",
+    "login_success": "Login was successful!",
+    "you_are_now_connected_to_nowpass": "You are now connected to the NOWPASS API backend server."
   }
 }
