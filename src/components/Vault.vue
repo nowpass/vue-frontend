@@ -694,12 +694,11 @@
 
             // Context menu
             onElementContextMenu(locals) {
-                console.log('open', locals)
                 this.menuData = locals
             },
 
             resetElementContextMenu() {
-                this.menuData = newMenuData()
+                this.menuData = null;
             },
 
         },
