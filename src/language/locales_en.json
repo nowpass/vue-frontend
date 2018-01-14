@@ -4,7 +4,8 @@
     "extDesc": "Open-Source password management.",
     "ext_default_title": "NOWPASS",
     "direction": "ltr",
-    "save": "Save and Login",
+    "save": "Save",
+    "save_and_login": "Save and Login",
     "saveStatus": "Options saved",
     "testApi": "Test Options",
     "nowpassOption": "Options",
@@ -59,6 +60,8 @@
     "delete_element": "Delete Element",
     "duplicate_element": "Duplicate Element",
     "login_success": "Login was successful!",
-    "you_are_now_connected_to_nowpass": "You are now connected to the NOWPASS API backend server."
+    "you_are_now_connected_to_nowpass": "You are now connected to the NOWPASS API backend server.",
+    "no_elements": "No elements",
+    "no_notes": "No notes"
   }
 }

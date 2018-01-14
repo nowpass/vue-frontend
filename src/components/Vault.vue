@@ -45,6 +45,10 @@
                 </div>
 
                 <div id="elements-body">
+                    <div v-if="elements.length === 0" class="list-group-item">
+                        <translate v-once :word="'no_elements'"/>
+                    </div>
+
                     <div v-for="element in elements"
                          class="single-element list-group-item"
                          v-bind:id="'element-' + element.id">
@@ -88,102 +92,7 @@
                         </div><!--//Row -->
 
                         <div class="edit-element edit-row" v-if="element === editElement">
-                            <div id="edit-element-container" class="col-12">
-                                <div class="row align-items-center">
-                                    <div class="col-6">
-                                        <div class="form-group">
-                                            <label for="title">
-                                                <translate :word="'title'"/>
-                                            </label>
-                                            <input type="text" id="title" placeholder="Title" v-model="element.title"
-                                                   class="form-control"/>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="form-group">
-                                            <label for="url">
-                                                <translate :word="'url'"/>
-                                            </label>
-                                            <input type="text" id="url" placeholder="https://" v-model="element.url"
-                                                   class="form-control"/>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="form-group">
-                                            <label for="username">
-                                                <translate :word="'username'"/>
-                                            </label>
-                                            <input type="text" id="username" v-model="element.username"
-                                                   class="form-control"/>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="form-group">
-                                            <label>
-                                                <translate :word="'password'"/>
-                                            </label>
-                                            <div class="input-group">
-                                                <input v-bind:type="element.unlocked ? 'text' : 'password'"
-                                                       v-model="element.clearPassword"
-                                                       class="form-control" :disabled="!element.unlocked"/>
-
-                                                <div class="input-group-append">
-                                                    <button class="btn btn-default"
-                                                            v-on:click.prevent="showGenerator(element)">
-                                                        <translate :word="'generate_new'"/>
-                                                    </button>
-                                                    <button v-if="!element.unlocked" class="btn btn-primary"
-                                                            v-on:click.prevent="showPassword(element)">
-                                                        <translate :word="'show'"/>
-                                                    </button>
-                                                    <button v-if="element.unlocked" class="btn btn-primary"
-                                                            v-on:click.prevent="hidePassword(element)">
-                                                        <translate :word="'hide'"/>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-6">
-                                        <label>
-                                            <translate :word="'comment'"/>
-                                        </label>
-                                        <textarea v-model="element.comment" class="form-control"></textarea>
-                                    </div>
-
-                                    <div class="col-6">
-                                        <div class="row">
-                                            <div class="col-12" v-if="element.createdAt">
-                                                <br/>
-                                                <label>
-                                                    <translate :word="'created_at'"/>
-                                                </label>
-                                                {{new Date(element.createdAt)}}
-                                            </div>
-
-                                            <div class="col-12" v-if="element.updatedAt">
-                                                <label>
-                                                    <translate :word="'updated_at'"/>
-                                                </label>
-                                                {{new Date(element.updatedAt)}}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-12">
-                                        <hr/>
-                                    </div>
-
-                                    <div class="col-12 text-right">
-                                        <button class="btn btn-default" v-on:click="showElement(element)">
-                                            <translate :word="'cancel'"/>
-                                        </button>
-                                        <button class="btn btn-primary" v-on:click="saveElement(element)">
-                                            <translate :word="'save'"/>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+                            <login :element="element" :isNew="false" v-on:storeLogin="saveElement" v-on:cancelEditLogin="showElement"></login>
                         </div>
                     </div>
                 </div><!-- //body-->
@@ -208,7 +117,7 @@
                                     <icon name="user-circle"></icon>
                                     <translate :word="'new_login'"/>
                                 </button>
-                                <!-- For later -->
+                                <!-- Later -->
                                 <!--
                                 <button class="btn btn-default list-group-item list-group-item-action">
                                   Mail-Account
@@ -226,7 +135,7 @@
                 </div>
 
                 <div id="login-new" v-if="isShowNewLogin">
-                    <login :element="newElement"></login>
+                    <login :element="newElement" :isNew="true" v-on:storeLogin="saveElement" v-on:cancelEditLogin="showElement"></login>
                 </div>
             </div>
 
@@ -321,7 +230,7 @@
 
 <script>
     // Components
-    import Login from './Login';
+    import Login from './parts/LoginEdit';
     import translate from './helpers/Translate'
     import Unlock from './Unlock'
     import LoginFirst from "./LoginFirst";
@@ -408,9 +317,14 @@
              * Fail for load Elements
              */
             failElements: function (error) {
-                console.log(error);
+                console.log("Error loading elements: " + JSON.stringify(error));
 
-                // TODO
+                // TODO show notification
+
+                if (error.response.status === 401) {
+                    this.$router.push('/options');
+                }
+
             },
 
             /**
@@ -644,8 +558,8 @@
              */
             showNewLogin: function () {
                 this.newElement = {
-                    title: 'New Element',
-                    url: 'https://',
+                    title: '',
+                    url: '',
                     username: '',
                     password: '',
                     unlocked: true,

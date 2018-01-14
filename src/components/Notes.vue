@@ -41,6 +41,10 @@
                 </div>
 
                 <div id="notes-body">
+                    <div v-if="notes.length == 0" class="list-group-item">
+                        <translate v-once :word="'no_notes'"/>
+                    </div>
+
                     <div v-for="note in notes"
                          class="single-note list-group-item"
                          v-bind:id="'note-' + note.id">
@@ -125,7 +129,7 @@
 
 <script>
     // Components
-    import Login from './Login';
+    import Login from './parts/LoginEdit';
     import translate from './helpers/Translate'
     import Unlock from './Unlock'
     import LoginFirst from "./LoginFirst";

@@ -71,7 +71,7 @@
                         <translate v-once :word="'testApi'" />
                     </button>
                     <button class="btn btn-primary" v-on:click="validateAndSave()">
-                        <translate v-once :word="'save'" />
+                        <translate v-once :word="'save_and_login'" />
                     </button>
                 </div>
             </div>

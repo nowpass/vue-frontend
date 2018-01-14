@@ -16,6 +16,7 @@ export default class {
     setDefault() {
         axios.defaults.headers['Content-Type'] = 'application/vnd.api+json';
         axios.defaults.headers['Accept'] = 'application/vnd.api+json';
+        axios.defaults.headers['api-key'] = this.apiKey;
     }
 
     /**
@@ -68,7 +69,6 @@ export default class {
         axios({
             method: 'get',
             url: url,
-            headers: {'api-key': this.apiKey},
         })
             .then(resolve)
             .catch(fail);
@@ -104,7 +104,6 @@ export default class {
         axios({
             method: method,
             url: url,
-            headers: {'api-key': this.apiKey},
             data: JSON.stringify(element)
         })
             .then(resolve)
@@ -125,7 +124,6 @@ export default class {
         axios({
             method: 'delete',
             url: url,
-            headers: {'api-key': this.apiKey},
             data: JSON.stringify({id: id})
         })
             .then(resolve)
