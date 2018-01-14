@@ -21,6 +21,12 @@
                             <icon name="cog"></icon>
                             <translate v-once :word="'options'"/>
                         </router-link>
+
+                        <a href="https://nowpass.org/help" target="_blank" class="list-group-item">
+                            <icon name="question"></icon>
+                            <translate v-once :word="'help'"/>
+                        </a>
+
                         <!-- DEV -->
                         <div v-once v-if="isDev" class="dev-menu">
                             <h3>Development</h3>
@@ -54,6 +60,7 @@
     import 'vue-awesome/icons/lock'
     import 'vue-awesome/icons/sticky-note-o'
     import 'vue-awesome/icons/cog'
+    import 'vue-awesome/icons/question'
 
     /**
      * Entry point (mostly just an skeleton, logic is in the components)
