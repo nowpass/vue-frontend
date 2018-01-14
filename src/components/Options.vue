@@ -99,7 +99,7 @@
              * Load the options from the localstorage mixin
              */
             loadOptions: function () {
-                this.apiUrl = this.getSetting('apiUrl', 'http://localhost:1337');
+                this.apiUrl = this.getSetting('apiUrl', 'https://nowpass.org');
                 this.apiEmail = this.getSetting('apiEmail', '');
 
                 this.apiPassword = this.getSetting('apiPassword', '');
