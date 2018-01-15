@@ -1,6 +1,6 @@
 # NOWPASS Vue.js 2 Frontend
 
-> Please note that NOWPASS is currently in an early alpha stage and ready for productive use.
+> Please note that NOWPASS is currently in an early alpha stage and not ready for productive use.
 
 > This App is used Google Chrome Extension and the Desktop application and should only be used for development standalone. 
 
