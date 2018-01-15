@@ -114,6 +114,8 @@
              * Fail for load Elements
              */
             failElements(error) {
+                window.localStorage.setItem('lastPostRequest', '');
+
                 console.log("Error loading elements: " + JSON.stringify(error));
 
                 // TODO show notification

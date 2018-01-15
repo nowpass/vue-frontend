@@ -1,8 +1,9 @@
 {
-  "name": "nowpass-vue-full",
-  "version": "1.0.0",
-  "description": "A Vue.js project",
-  "author": "Yves Hoppe <yves.hoppe@community.joomla.org>",
+  "name": "nowpass-vue",
+  "version": "0.1.0",
+  "description": "Vue.js 2 Frontend of the NOWPASS password manager",
+  "author": "Yves Hoppe <yves.hoppe@nowpass.org>",
+  "license": "GPL-3.0",
   "private": true,
   "scripts": {
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
@@ -91,6 +92,10 @@
   "engines": {
     "node": ">= 6.0.0",
     "npm": ">= 3.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/nowpass/frontend.git"
   },
   "browserslist": [
     "> 1%",
