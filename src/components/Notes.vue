@@ -9,9 +9,8 @@
                     </h3>
                 </div>
                 <div class="col-3 text-right">
-                    <!-- TODO Add debounce -->
                     <input type="text" placeholder="Search" v-model="filterSearch" class="form-control"
-                           v-on:keyup="resetPage().loadNotes()"/>
+                           v-on:keyup="searchElements"/>
                 </div>
             </div>
 
@@ -132,8 +131,8 @@
     import Login from './parts/LoginEdit';
     import translate from './helpers/Translate'
     import Unlock from './Unlock'
-    import LoginFirst from "./LoginFirst";
-    import Loading from "./Loading";
+    import LoginFirst from "./parts/LoginFirst";
+    import Loading from "./parts/Loading";
     import Pagination from "./parts/Pagination"
 
     // 3rd party
@@ -142,6 +141,7 @@
     import dropdown from 'vue-my-dropdown';
     import {format} from 'date-fns';
     import {en} from 'date-fns';
+    import debounce from 'lodash/debounce'
 
     // Mixins
     import settings from '../mixins/settings';
@@ -369,6 +369,12 @@
                 this.loadNotes();
             },
 
+            /**
+             * Search for elements
+             */
+            searchElements: debounce(function () {
+                this.resetPage().loadNotes();
+            }, 300),
 
             /**
              * Update the passphrase
@@ -434,7 +440,7 @@
                 unlockTask: '',
 
                 // Check if we have a passphrase or temporary one
-                passphrase: this.getSetting('passphrase', '') || this.getSetting('temporary_passphrase'),
+                passphrase: this.getPassphrase(),
             }
         }
     }

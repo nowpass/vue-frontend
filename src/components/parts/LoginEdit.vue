@@ -1,3 +1,4 @@
+<!-- TODO use emit instead of direct parent access -->
 <template>
     <div id="edit-login" class="col-12" v-bind:class="isNew ? 'new-login' : 'edit-login'">
         <div v-if="isNew">

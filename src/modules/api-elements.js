@@ -6,8 +6,6 @@ export const DELETE_ELEMENTS = '/api/v1/elements/';
 
 export default class {
     constructor(apiUrl, apiKey) {
-        console.log(apiUrl, apiKey);
-
         this.apiUrl = apiUrl;
         this.apiKey = apiKey;
         this.setDefault();
@@ -36,13 +34,15 @@ export default class {
 
         let url = this.apiUrl + GET_ELEMENTS;
 
-        console.log(url);
-
         let parts = [];
 
         // Filter Search
         if (filters.filterSearch) {
             parts.push('search=' + filters.filterSearch);
+        }
+
+        if (filters.pwOnly) {
+            parts.push('pw_only=true');
         }
 
         // Add Ordering
@@ -61,10 +61,6 @@ export default class {
 
         // Encode possible special chars
         url = encodeURI(url);
-
-        // Query complete
-        console.log('Querying ' + url);
-
 
         axios({
             method: 'get',
@@ -118,8 +114,6 @@ export default class {
      */
     delete(id, resolve, fail) {
         let url = this.apiUrl + DELETE_ELEMENTS + id;
-
-        console.log('Deleting ' + id + ' at ' + url);
 
         axios({
             method: 'delete',

@@ -22,7 +22,7 @@
                 </div>
             </div>
             <div class="list-group-item list-group-item-action text-right" v-on:click.prevent="close()">
-                <translate v-once :word="'close'"/>
+                <button class="btn btn-default"><translate v-once :word="'close'"/></button>
             </div>
         </div>
 
@@ -35,15 +35,17 @@
 <script>
     // Components
     import translate from './helpers/Translate'
-    import loading from './Loading'
+    import loading from './parts/Loading'
 
     // Mixins
     import settings from '../mixins/settings'
     import decrypt from '../mixins/decrypt'
     import chrome from "../mixins/chrome";
 
+    // Modules
+    import ApiElements from '../modules/api-elements'
+
     // 3rd party
-    import axios from 'axios'
     import Icon from 'vue-awesome/components/Icon'
 
     /**
@@ -62,30 +64,45 @@
         },
         methods: {
             /**
-             * TODO move to wrapper and add loading dialog
-             *
              * Load the elements for this site
              */
             load: function () {
-                // Should not happen
-                if (!this.apiKey || !this.passphrase) {
-                    throw 'Api key and passphrase needed for this view!';
+                this.toggleLoading();
+
+                let filters = {
+                    filterSearch: this.url,
+                    orderBy: 'id DESC', // newest first
+                    offset: 0,
+                    limit: 50,
+                    pwOnly: true
+                };
+
+                this.apiElements.load(filters, this.resolveElements, this.failElements)
+            },
+
+            /**
+             * Resolve the response for load Elements
+             */
+            resolveElements(response) {
+                this.elements = response.data['elements'];
+
+                this.toggleLoading();
+            },
+
+            /**
+             * Fail for load Elements
+             */
+            failElements(error) {
+                console.log("Error loading elements: " + JSON.stringify(error));
+
+                // TODO show notification
+                if (error.status) {
+                    this.errorMsg = error.response.status + ' ' + error.response.statusText;
+
+                    return;
                 }
 
-                let url = this.apiUrl + '/api/v1/elements?search=' + this.url + '&pw_only=true&limit=50';
-                url = encodeURI(url);
-
-                var vm = this;
-
-                axios({
-                    method: 'get',
-                    url: url,
-                    headers: {'api-key': this.apiKey},
-                }).then(function (response) {
-                    vm.elements = response.data['elements'];
-                }).catch(function (error) {
-                    vm.errorMsg = error.response.status + ' ' + error.response.statusText;
-                });
+                this.errorMsg = 'Unknown Error - check your connection!';
             },
 
             /**
@@ -122,17 +139,25 @@
                 }
 
                 this.sendBrowserMessage({task: 'insertClose'});
-            }
+            },
+
+            /**
+             * Toggle Loading dialog
+             */
+            toggleLoading() {
+                this.isLoading = !this.isLoading;
+            },
         },
         data() {
             return {
+                apiElements: new ApiElements(this.getSetting('apiUrl', ''), this.getSetting('apiKey', '')),
+
                 // What login are we looking for?
                 url: this.$route.params.url,
                 elements: [],
 
-                apiUrl: this.getSetting('apiUrl', ''),
                 apiKey: this.getSetting('apiKey', ''),
-                passphrase: this.getSetting('passphrase', '') || this.getSetting('temporary_passphrase'),
+                passphrase: this.getPassphrase(),
 
                 isLoading: false,
             }

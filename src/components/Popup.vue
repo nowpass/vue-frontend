@@ -2,7 +2,6 @@
     <div id="popup">
         <div class="list-group">
             <div class="list-group-item list-group-item-light">
-                <!-- TODO ADD debounce -->
                 <input type="text" placeholder="Search" v-model="filterSearch" class="form-control"
                        v-on:keyup="searchElements()"/>
             </div>
@@ -85,16 +84,19 @@
     // Components
     import translate from './helpers/Translate'
     import Unlock from './Unlock'
-    import LoginFirst from "./LoginFirst";
-    import loading from './Loading'
+    import LoginFirst from "./parts/LoginFirst";
+    import loading from './parts/Loading'
 
     // Mixins
     import settings from '../mixins/settings'
     import decrypt from '../mixins/decrypt'
 
+    // Modules
+    import ApiElements from '../modules/api-elements'
+
     // 3rd party
-    import axios from 'axios'
     import Icon from 'vue-awesome/components/Icon'
+    import debounce from 'lodash/debounce'
 
     // Icons Font-Awesome
     import 'vue-awesome/icons/cog'
@@ -127,11 +129,7 @@
             /**
              * Search for elements
              */
-            searchElements: function () {
-                if (!this.apiKey) {
-                    throw 'Api Key needs to be set!';
-                }
-
+            searchElements: debounce(function () {
                 this.errorMsg = '';
 
                 // Reset
@@ -140,27 +138,39 @@
                     return;
                 }
 
-                let url = this.apiUrl + '/api/v1/elements?search=' + this.filterSearch + '&limit=20';
+                this.toggleLoading();
 
-                url = encodeURI(url);
+                let filters = {
+                    filterSearch: this.filterSearch,
+                    orderBy: 'id DESC', // newest first
+                    offset: 0,
+                    limit: 50,
+                    pwOnly: true
+                };
 
-                var vm = this;
+                this.apiElements.load(filters, this.resolveElements, this.failElements)
+            }, 300),
 
-                axios({
-                    method: 'get',
-                    url: url,
-                    headers: {'api-key': this.apiKey},
-                }).then(function (response) {
-                    vm.elements = response.data['elements'];
-                }).catch(function (error) {
-                    vm.errorMsg = error.response.status + ' ' + error.response.statusText;
-                });
+            resolveElements(result) {
+                this.elements = result.data['elements'];
+
+                this.toggleLoading();
             },
+
+            /**
+             * Fail for load Elements
+             */
+            failElements(error) {
+                console.log("Error loading elements: " + JSON.stringify(error));
+
+                 // TODO
+            },
+
             /**
              * Copy Password
              * @param element {object}
              */
-            copyPassword: function (element) {
+            copyPassword(element) {
                 if (!this.passphrase) {
                     this.activeElement = element;
                     this.showUnlock = true;
@@ -171,8 +181,6 @@
                     element.clearPassword = this.decrypt(element.password, this.passphrase)
                 }
 
-                console.log('to clipboard ' + element.clearPassword);
-
                 // Works on current Chromium
                 document.oncopy = function (event) {
                     event.clipboardData.setData("Text", element.clearPassword);
@@ -182,12 +190,13 @@
                 document.execCommand("Copy");
                 document.oncopy = undefined;
             },
+
             /**
              * Update the passphrase
              * @param passphrase {string}
              * @param activeElement
              */
-            updatePassphrase: function (passphrase, activeElement) {
+            updatePassphrase(passphrase, activeElement) {
                 this.showUnlock = false;
 
                 if (passphrase === '') {
@@ -205,13 +214,20 @@
 
                     return;
                 }
-            }
+            },
+
+            /**
+             * Toggle Loading dialog
+             */
+            toggleLoading() {
+                this.isLoading = !this.isLoading;
+            },
         },
         data() {
             return {
-                apiUrl: this.getSetting('apiUrl', ''),
+                apiElements: new ApiElements(this.getSetting('apiUrl', ''), this.getSetting('apiKey', '')),
                 apiKey: this.getSetting('apiKey', ''),
-                passphrase: this.getSetting('passphrase', '') || this.getSetting('temporary_passphrase'),
+                passphrase: this.getPassphrase(),
                 showUnlock: false,
 
                 elements: [],

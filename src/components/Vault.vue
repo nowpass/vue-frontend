@@ -9,9 +9,8 @@
                     </h3>
                 </div>
                 <div class="col-3 text-right">
-                    <!-- TODO Add debounce -->
                     <input type="text" placeholder="Search" v-model="filterSearch" class="form-control"
-                           v-on:keyup="resetPage().loadElements()"/>
+                           v-on:keyup="searchElements()"/>
                 </div>
             </div>
 
@@ -52,7 +51,8 @@
                     <div v-for="element in elements"
                          class="single-element list-group-item"
                          v-bind:id="'element-' + element.id">
-                        <div class="row info-element align-items-center" v-on:click="showElement(element)" v-on:contextmenu.prevent="$refs.elementContextMenu.open($event, {element: element})">
+                        <div class="row info-element align-items-center" v-on:click="showElement(element)"
+                             v-on:contextmenu.prevent="$refs.elementContextMenu.open($event, {element: element})">
                             <div class="col-md-1">
                                 <icon v-bind:name="iconMapping[element.kind]"></icon>
                             </div>
@@ -92,7 +92,8 @@
                         </div><!--//Row -->
 
                         <div class="edit-element edit-row" v-if="element === editElement">
-                            <login :element="element" :isNew="false" v-on:storeLogin="saveElement" v-on:cancelEditLogin="showElement"></login>
+                            <login :element="element" :isNew="false" v-on:storeLogin="saveElement"
+                                   v-on:cancelEditLogin="showElement"></login>
                         </div>
                     </div>
                 </div><!-- //body-->
@@ -135,7 +136,8 @@
                 </div>
 
                 <div id="login-new" v-if="isShowNewLogin">
-                    <login :element="newElement" :isNew="true" v-on:storeLogin="saveElement" v-on:cancelEditLogin="showElement"></login>
+                    <login :element="newElement" :isNew="true" v-on:storeLogin="saveElement"
+                           v-on:cancelEditLogin="showElement"></login>
                 </div>
             </div>
 
@@ -145,68 +147,7 @@
             <unlock v-on:update_passphrase="updatePassphrase" :element="unlockElement" :task="unlockTask"></unlock>
         </div>
 
-        <div id="popup-generator" class="now-modal now-fade" v-bind:class="isGeneratorPopupActive ? '' : 'invisible'">
-            <div class="now-modal-inner">
-                <div class="now-modal-title">
-                    <h4>
-                        <translate :word="'password_generator'"/>
-                    </h4>
-                </div>
-                <div class="now-modal-body">
-                    <div class="form-group">
-                        <label for="generator-password">
-                            <translate :word="'password'"/>
-                            :</label>
-                        <div class="input-group">
-                            <input type="text" id="generator-password" class="form-control"
-                                   v-model.trim="generatedPassword"/>
-                            <div class="input-group-append">
-                                <button class="btn btn-default" v-on:click="setGeneratedPassword()">
-                                    <icon name="refresh"></icon>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <input id="generator-numbers" type="checkbox" v-model="generatorNumbers"/>
-                        <label for="generator-numbers">
-                            <translate :word="'numbers'"/>
-                            (0-9)</label>
-                    </div>
-
-                    <div class="form-group">
-                        <input id="generator-special" type="checkbox" v-model="generatorSpecial"/>
-                        <label for="generator-special">
-                            <translate :word="'special_characters'"/>
-                        </label>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="generator-length">
-                            <translate :word="'password_length'"/>
-                            :</label>
-                        <div class="input-group">
-                            <input type="range" id="generator-length" v-model="generatorLength" min="1" max="50"
-                                   class="form-control">
-                            <div class="input-group-append">
-                                <button class="btn btn-default">{{generatorLength}}</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="now-modal-footer text-center">
-                    <div class="form-group">
-                        <button class="btn btn-default" v-on:click.prevent="hideGenerator()">
-                            <translate :word="'cancel'"/>
-                        </button>
-                        <button class="btn btn-primary" v-on:click.prevent="usePassword(generatorElement)">
-                            <translate :word="'use_password'"/>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <generate v-if="isGeneratorPopupActive" :element="generatorElement" v-on:closeGenerator="hideGenerator" v-on:useGenerated="useGeneratedPassword"></generate>
 
         <div v-if="isLoading">
             <loading v-once></loading>
@@ -216,7 +157,8 @@
             <login-first v-once></login-first>
         </div>
 
-        <context-menu id="element-context" ref="elementContextMenu" @ctx-open="onElementContextMenu"  @ctx-cancel="resetElementContextMenu">
+        <context-menu id="element-context" ref="elementContextMenu" @ctx-open="onElementContextMenu"
+                      @ctx-cancel="resetElementContextMenu">
             <li v-on:click="deleteElement($event, menuData)">
                 <translate :word="'delete_element'"/>
             </li>
@@ -233,13 +175,7 @@
     import Login from './parts/LoginEdit';
     import translate from './helpers/Translate'
     import Unlock from './Unlock'
-    import LoginFirst from "./LoginFirst";
-
-    // 3rd party
-    import axios from 'axios'
-    import Icon from 'vue-awesome/components/Icon'
-    import dropdown from 'vue-my-dropdown';
-    import contextMenu from 'vue-context-menu'
+    import LoginFirst from "./parts/LoginFirst";
 
     // Mixins
     import settings from '../mixins/settings';
@@ -248,14 +184,21 @@
     // Modules
     import ApiElements from '../modules/api-elements'
 
+    // 3rd party
+    import Icon from 'vue-awesome/components/Icon'
+    import dropdown from 'vue-my-dropdown'
+    import contextMenu from 'vue-context-menu'
+    import debounce from 'lodash/debounce'
+
     // Font Awesome icons
     import 'vue-awesome/icons/user-circle'
     import 'vue-awesome/icons/refresh'
     import 'vue-awesome/icons/sort'
     import 'vue-awesome/icons/plus-circle'
     import 'vue-awesome/icons/spinner'
-    import Loading from "./Loading";
+    import Loading from "./parts/Loading";
     import Pagination from "./parts/Pagination";
+    import Generate from "./Generate";
 
     /**
      * Main Management for Elements (except Notes)
@@ -263,6 +206,7 @@
     export default {
         name: 'nowpass',
         components: {
+            Generate,
             Pagination,
             Loading,
             LoginFirst,
@@ -284,7 +228,6 @@
                 return;
             }
             this.loadElements();
-            this.setGeneratedPassword();
         },
         methods: {
             /**
@@ -306,7 +249,7 @@
             /**
              * Resolve the response for load Elements
              */
-            resolveElements: function (response) {
+            resolveElements(response) {
                 this.elements = response.data['elements'];
                 this.total = parseInt(response.data['total']);
 
@@ -316,7 +259,7 @@
             /**
              * Fail for load Elements
              */
-            failElements: function (error) {
+            failElements(error) {
                 console.log("Error loading elements: " + JSON.stringify(error));
 
                 // TODO show notification
@@ -332,7 +275,7 @@
             /**
              * Store an element
              */
-            saveElement: function (saveElement) {
+            saveElement(saveElement) {
                 if (!this.passphrase) {
                     this.showUnlock = true;
                     this.unlockElement = null;
@@ -370,7 +313,7 @@
              * Go to page
              * @param page {number}
              */
-            goToPage: function (page) {
+            goToPage(page) {
                 this.offset = (page - 1) * this.limit;
                 this.currentPage = page;
                 this.loadElements();
@@ -381,7 +324,7 @@
              *
              * @param limit {number}
              */
-            changeLimit: function (limit) {
+            changeLimit(limit) {
                 this.limit = limit;
                 this.resetPage();
                 this.loadElements();
@@ -391,7 +334,7 @@
              * Reset page (e.g. return to first page and set Offset to zero)
              * @returns this {methods}
              */
-            resetPage: function () {
+            resetPage() {
                 this.offset = 0;
                 this.currentPage = 1;
 
@@ -401,7 +344,7 @@
             /**
              * Toggle Loading dialog
              */
-            toggleLoading: function () {
+            toggleLoading() {
                 this.isLoading = !this.isLoading;
             },
 
@@ -409,7 +352,7 @@
              * Show / Edit given element
              * @param element {object}
              */
-            showElement: function (element) {
+            showElement(element) {
                 if (this.newElement === element) {
                     this.newElement = {};
                     this.isShowNewLogin = false;
@@ -428,7 +371,7 @@
              * Show password
              * @param element {object}
              */
-            showPassword: function (element) {
+            showPassword(element) {
                 // Let's unlock that and save passphrase in state (if wanted)
                 if (!this.passphrase) {
                     this.showUnlock = true;
@@ -439,13 +382,10 @@
 
                 let password = this.decrypt(element.password, this.passphrase);
 
-                // TODO remove
-                console.log('Unlocked password ' + password);
-
                 element.unlocked = true;
                 element.clearPassword = password;
 
-                // Hack for dev, so element gets update
+                // Workaround for dev, so element gets update
                 element.title += ' ';
             },
 
@@ -453,7 +393,7 @@
              * Hide password
              * @param element
              */
-            hidePassword: function (element) {
+            hidePassword(element) {
                 element.unlocked = false;
                 element.title = element.title.trim();
             },
@@ -462,7 +402,7 @@
              * Set the ordering of the passwords (db query, e.g. triggers a reload)
              * @param orderBy {string}
              */
-            orderBy: function (orderBy) {
+            orderBy(orderBy) {
                 if (this.orderByValue === orderBy) {
                     // We already order that way, let's switch ASC / DESC
                     this.orderByASC = !this.orderByASC;
@@ -481,7 +421,7 @@
              * Show the password generator
              * @param element {object}
              */
-            showGenerator: function (element) {
+            showGenerator(element) {
                 if (!this.passphrase) {
                     this.unlockElement = element;
                     this.unlockTask = 'generator';
@@ -492,80 +432,47 @@
 
                 this.generatorElement = element;
                 this.isGeneratorPopupActive = true;
-
-                // Generate a new password
-                this.generatedPassword = this.getGeneratePassword();
             },
 
             /**
              * Hide the generator and reset generated password etc.
              */
-            hideGenerator: function () {
-                this.generatedPassword = null;
+            hideGenerator() {
                 this.generatorElement = null;
                 this.isGeneratorPopupActive = false;
             },
 
             /**
              * Inserts the password into the given element (both encrypted and unecrypted)
-             * @param element {object}
+             * @param generatedPassword {string}
              */
-            usePassword: function (element) {
-                element.password = this.encrypt(this.generatedPassword, this.passphrase);
-                element.clearPassword = this.generatedPassword;
-                element.unlocked = true;
+            useGeneratedPassword(generatedPassword) {
+                console.log('Using generated pw' + generatedPassword);
 
-                this.hideGenerator();
-            },
+                this.generatorElement.password = this.encrypt(generatedPassword, this.passphrase);
+                this.generatorElement.clearPassword = generatedPassword;
+                this.generatorElement.unlocked = true;
 
-            /**
-             * Set the generated password
-             */
-            setGeneratedPassword: function () {
-                this.generatedPassword = this.getGeneratePassword();
-            },
+                // Workaround as else child is not updated
+                this.generatorElement.title += ' ';
+                this.generatorElement.title = this.generatorElement.title.trim();
 
-            /**
-             * Generate a random (using window.crypto function of the browser) password with the given settings
-             * @returns {string}
-             */
-            getGeneratePassword: function () {
-                let password = '';
-                let chars = this.LOWER_CHARS + this.UPPER_CHARS;
-
-                if (this.generatorNumbers) {
-                    chars += this.NUMBERS;
-                }
-
-                if (this.generatorSpecial) {
-                    chars += this.SPECIAL;
-                }
-
-                // Let's use the crypto Browser API
-                let crypto = window.crypto || window.msCrypto; // for IE 11
-                let randomNumbers = new Uint8Array(this.generatorLength);
-
-                // Get a set of random numbers (0-255)
-                crypto.getRandomValues(randomNumbers);
-
-                for (let i = 0; i < this.generatorLength; i++) {
-                    password += chars.charAt(Math.floor((randomNumbers[i] / 256) * chars.length));
-                }
-
-                return password;
+                this.isGeneratorPopupActive = false;
             },
 
             /**
              * Show the new login
              */
-            showNewLogin: function () {
+            showNewLogin() {
                 this.newElement = {
                     title: '',
                     url: '',
                     username: '',
                     password: '',
                     unlocked: true,
-                    clearPassword: this.getGeneratePassword(),
+
+                    // Auto generate?
+                    clearPassword: '',
                     comment: ''
                 };
 
@@ -574,11 +481,11 @@
 
             /**
              * Update the passphrase
-             * @param passphrase
-             * @param activeElement
-             * @param task
+             * @param passphrase {string}
+             * @param activeElement {object}
+             * @param task {string}
              */
-            updatePassphrase: function (passphrase, activeElement, task) {
+            updatePassphrase(passphrase, activeElement, task) {
                 this.showUnlock = false;
 
                 if (!passphrase) {
@@ -586,10 +493,6 @@
                 }
 
                 this.passphrase = passphrase;
-
-                console.log(passphrase);
-                console.log(activeElement);
-                console.log(task);
 
                 if (activeElement == null) {
                     return;
@@ -604,19 +507,40 @@
                 this.showGenerator(activeElement);
             },
 
+            /**
+             * Delete an element
+             * @param evt {Event)
+             * @param data {object}
+             */
             deleteElement(evt, data) {
-                this.apiElements.delete(data.element.id, (result) => {this.loadElements()}, (error) => {console.log(error)})
+                this.apiElements.delete(data.element.id, (result) => {
+                    this.loadElements()
+                }, (error) => {
+                    console.log(error)
+                })
             },
 
-            // Context menu
+            /**
+             * Temporary store item data
+             */
             onElementContextMenu(locals) {
                 this.menuData = locals
             },
 
+            /**
+             * Reset context menu
+             */
             resetElementContextMenu() {
                 this.menuData = null;
             },
 
+            /**
+             * Search for elements
+             */
+            searchElements: debounce(function () {
+                this.resetPage();
+                this.loadElements();
+            }, 300),
         },
         data() {
             return {
@@ -629,9 +553,9 @@
                 elementToGenerate: null,
                 elements: [],
 
-                // Pagination and Filter
+                // Pagination and Filter (TODO make setting)
                 offset: 0,
-                limit: 20,
+                limit: 10,
                 total: 0,
                 currentPage: 1,
 
@@ -667,22 +591,11 @@
                 unlockTask: '',
 
                 // Check if we have a passphrase or temporary one
-                passphrase: this.getSetting('passphrase', '') || this.getSetting('temporary_passphrase'),
+                passphrase: this.getPassphrase(),
 
                 // Generator Popup
                 isGeneratorPopupActive: false,
-                generatedPassword: '',
-                generatorNumbers: true,
-                generatorSpecial: true,
-                generatorLength: 13,
-
                 generatorElement: null,
-
-                // TODO move to constant export
-                LOWER_CHARS: 'abcdefghijklmnopqrstuvwxyz',
-                UPPER_CHARS: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-                NUMBERS: '0123456789',
-                SPECIAL: '!"§$&(/)=?@\'+-*#,\\.-_'
             }
         }
     }

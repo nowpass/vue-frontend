@@ -56,20 +56,17 @@
             /**
              * Emit update_passphrase event to parent
              */
-            unlock: function () {
-                console.log('Unlocking');
-
+            unlock() {
                 if (!this.passphrase) {
                     return;
                 }
 
                 if (this.remember) {
                     this.saveSetting('passphrase', this.passphrase);
-                    return;
+                } else {
+                    // Reseted on every extension launch
+                    this.saveSetting('temporary_passphrase', this.passphrase);
                 }
-
-                // Reseted on every extension launch
-                this.saveSetting('temporary_passphrase', this.passphrase);
 
                 // Popup mode
                 if (this.$route.path !== '/unlock') {
@@ -87,7 +84,7 @@
             /**
              * Emit update_passphrase event with empty passphrase
              */
-            close: function () {
+            close() {
                 this.passphrase = '';
 
                 if (this.$route.path !== '/unlock') {

@@ -4,7 +4,7 @@
 export default {
     name: 'Settings',
     methods: {
-        getSetting: function (key, def) {
+        getSetting(key, def) {
             let option = window.localStorage.getItem(key);
 
             if (option) {
@@ -13,8 +13,12 @@ export default {
             return def;
         },
 
-        saveSetting: function (key, val) {
+        saveSetting(key, val) {
             window.localStorage.setItem(key, val);
-        }
+        },
+
+        getPassphrase() {
+            return this.getSetting('passphrase', '') || this.getSetting('temporary_passphrase');
+        },
     }
 }

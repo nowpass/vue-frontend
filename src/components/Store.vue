@@ -44,7 +44,7 @@
 <script>
     // Components
     import translate from './helpers/Translate'
-    import loading from './Loading'
+    import loading from './parts/Loading'
 
     // Mixins
     import settings from '../mixins/settings'
@@ -52,15 +52,17 @@
     import formparse from '../mixins/formparse'
     import chrome from '../mixins/chrome'
 
+    // Modules
+    import ApiElements from '../modules/api-elements'
+
     // 3rd party
-    import axios from 'axios'
     import Icon from 'vue-awesome/components/Icon'
 
     /**
      * Insert popup (in iframe in the site, calling chrome methods)
      */
     export default {
-        name: "insert",
+        name: "store",
         components: {
             translate,
             loading,
@@ -78,50 +80,67 @@
                 return;
             }
 
-            this.load();
+            this.loadElements();
         },
         methods: {
+
             /**
-             * TODO move to wrapper and add loading dialog
-             *
-             * Load the elements for this site
+             * Trigger loading the Elements into the table (promise) - API key needs to be set
              */
-            load: function () {
-                // Should not happen
-                if (!this.apiKey || !this.passphrase) {
-                    throw 'Api key and passphrase needed for this view!';
+            loadElements() {
+                this.toggleLoading();
+
+                let filters = {
+                    filterSearch: this.url,
+                    orderBy: 'id DESC', // newest first
+                    offset: 0,
+                    limit: 50,
+                    pwOnly: true
+                };
+
+                this.apiElements.load(filters, this.resolveElements, this.failElements)
+            },
+
+            /**
+             * Resolve the response for load Elements
+             */
+            resolveElements(response) {
+                this.elements = response.data['elements'];
+
+                this.toggleLoading();
+            },
+
+            /**
+             * Fail for load Elements
+             */
+            failElements(error) {
+                console.log("Error loading elements: " + JSON.stringify(error));
+
+                // TODO show notification
+                if (error.status) {
+                    this.errorMsg = error.response.status + ' ' + error.response.statusText;
+
+                    return;
                 }
 
-                let url = this.apiUrl + '/api/v1/elements?search=' + this.url + '&pw_only=true&limit=50';
-                url = encodeURI(url);
-
-                var vm = this;
-
-                axios({
-                    method: 'get',
-                    url: url,
-                    headers: {'api-key': this.apiKey},
-                }).then(function (response) {
-                    vm.elements = response.data['elements'];
-                }).catch(function (error) {
-                    vm.errorMsg = error.response.status + ' ' + error.response.statusText;
-                });
+                this.errorMsg = 'Unknown Error - check your connection!';
             },
+
 
             /**
              * Update an element
              *
              * @param element {object}
              */
-            update: function (element) {
+            update(element) {
                 if (process.env.NODE_ENV === 'development') {
                     console.log('In dev environment update called');
                     return;
                 }
 
-                this.setRequestData(this.postData.requestBody.formData);
+                this.toggleLoading();
 
-                let url = this.apiUrl + '/api/v1/elements/' + element.id;
+                this.setRequestData(this.postData.requestBody.formData);
 
                 let username = this.getFormUsername();
                 let clearPassword = this.getFormPassword();
@@ -131,33 +150,42 @@
                 element.password = this.encrypt(clearPassword, this.passphrase);
                 element.form_data = JSON.stringify(form_data);
 
-                var vm = this;
 
-                axios.defaults.headers['Content-Type'] = 'application/vnd.api+json';
-                axios.defaults.headers['Accept'] = 'application/vnd.api+json';
+                this.apiElements.store(element, this.resolveSaveElement, this.failSaveElement);
+            },
 
-                axios({
-                    method: 'patch',
-                    url: url,
-                    headers: {'api-key': this.apiKey},
-                    data: JSON.stringify(element)
-                }).then(function (response) {
-                    window.localStorage.setItem('lastPostRequest', '');
+            /**
+             *  Resolve the saving of an element (e.g. close popup and reset it)
+             */
+            resolveSaveElement(response) {
+                window.localStorage.setItem('lastPostRequest', '');
 
-                    // Close popup
-                    vm.sendClosePopup();
-                }).catch(function (error) {
-                    // TODO handle error
-                    console.log(error);
-                });
+                this.sendClosePopup();
+            },
+
+            /**
+             *  Error handling for failed saving
+             */
+            failSaveElement(error) {
+                console.log("Error saving elements: " + JSON.stringify(error));
+
+                // TODO show notification
+                if (error.status) {
+                    this.errorMsg = error.response.status + ' ' + error.response.statusText;
+
+                    return;
+                }
+
+                this.errorMsg = 'Unknown Error - check your connection!';
+
+                window.localStorage.setItem('lastPostRequest', '');
             },
 
             /**
              * Close the Popup
              */
-            close: function () {
+            close() {
                 if (process.env.NODE_ENV === 'development') {
-                    console.log('Dev environment close called');
                     return;
                 }
 
@@ -170,9 +198,8 @@
             /**
              * Save the new element
              */
-            store: function () {
+            store() {
                 if (process.env.NODE_ENV === 'development') {
-                    console.log('In dev environment store called');
                     return;
                 }
 
@@ -198,48 +225,39 @@
                     status: 1
                 };
 
-                // Save to API
-                console.log('Saving to API' + JSON.stringify(element));
-
-                // Base URL (TODO move to const)
-                let url = this.apiUrl + '/api/v1/elements';
-
-                var vm = this;
-
-                axios.defaults.headers['Content-Type'] = 'application/vnd.api+json';
-                axios.defaults.headers['Accept'] = 'application/vnd.api+json';
-
-                axios({
-                    method: 'post',
-                    url: url,
-                    headers: {'api-key': this.apiKey},
-                    data: JSON.stringify(element)
-                }).then(function (response) {
-                    window.localStorage.setItem('lastPostRequest', '');
-
-                    // Close popup
-                    vm.sendClosePopup();
-                }).catch(function (error) {
-                    // TODO handle error
-                    console.log(error);
-                });
+                this.apiElements.store(element, this.resolveSaveElement, this.failSaveElement);
             },
 
-            sendClosePopup: function () {
-                this.sendBrowserMessage({task: 'insertClose'});
+            /**
+             * Close Popup
+             */
+            sendClosePopup() {
+                if (process.env.NODE_ENV === 'development') {
+                    return;
+                }
+
+                this.sendBrowserMessage({task: 'storeClose'});
+            },
+
+            /**
+             * Toggle Loading dialog
+             */
+            toggleLoading() {
+                this.isLoading = !this.isLoading;
             }
         },
         data() {
             return {
+                apiElements: new ApiElements(this.getSetting('apiUrl', ''), this.getSetting('apiKey', '')),
+
                 // What login are we looking for?
                 postData: JSON.parse(this.getSetting('lastPostRequest', '')),
                 url: this.$route.params.url,
 
                 elements: [],
 
-                apiUrl: this.getSetting('apiUrl', ''),
                 apiKey: this.getSetting('apiKey', ''),
-                passphrase: this.getSetting('passphrase', '') || this.getSetting('temporary_passphrase'),
+                passphrase: this.getPassphrase(),
 
                 isLoading: false,
             }
@@ -262,10 +280,6 @@
 
     body {
         min-width: 200px !important;
-    }
-
-    #nowpass, body {
-        width: 100%;
     }
 
     .list-group-item {

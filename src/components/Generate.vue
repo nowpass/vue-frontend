@@ -94,15 +94,16 @@
             /**
              * Set the generated password
              */
-            setGeneratedPassword: function () {
+            setGeneratedPassword() {
                 this.generatedPassword = this.getGeneratePassword();
+                this.storeSettings();
             },
 
             /**
              * Generate a random (using window.crypto function of the browser) password with the given settings
              * @returns {string}
              */
-            getGeneratePassword: function () {
+            getGeneratePassword() {
                 let password = '';
                 let chars = LOWER_CHARS + UPPER_CHARS;
 
@@ -130,34 +131,48 @@
             },
 
             /**
+             * Update preferences
+             */
+            storeSettings() {
+                // Settings are saved as String ..
+                this.saveSetting('generatorNumbers', this.generatorNumbers ? '1' : '');
+                this.saveSetting('generatorSpecial', this.generatorSpecial ? '1' : '');
+                this.saveSetting('generatorLength', this.generatorLength);
+
+            },
+
+            /**
              * Emit update_passphrase event with empty passphrase
              */
-            close: function () {
+            close() {
                 this.generatedPassword = "";
 
                 // Used in vault etc. on the extension itself (not in an iframe)
                 if (this.isUsedIntern) {
-                    this.$emit('use_generated', this.generatedPassword);
+                    this.$emit('closeGenerator');
                     return;
                 }
 
                 if (process.env.NODE_ENV === 'development') {
-                    console.log('in dev environment');
+                    console.log('In dev environment');
                     return;
                 }
 
                 this.sendBrowserMessage({task: 'generatedClose'});
             },
-            
-            use: function () {
+
+            /**
+             * Use the password
+             */
+            use() {
                 // Used in vault etc. on the extension itself (not in an iframe)
                 if (this.isUsedIntern) {
-                    this.$emit('use_generated', this.generatedPassword);
+                    this.$emit('useGenerated', this.generatedPassword);
                     return;
                 }
 
                 if (process.env.NODE_ENV === 'development') {
-                    console.log('in dev environment');
+                    console.log('In dev environment');
                     return;
                 }
 
@@ -170,9 +185,9 @@
 
                 // Generator
                 isGeneratorPopupActive: false,
-                generatorNumbers: true,
-                generatorSpecial: true,
-                generatorLength: 13,
+                generatorNumbers: this.getSetting('generatorNumbers'),
+                generatorSpecial: this.getSetting('generatorSpecial'),
+                generatorLength: this.getSetting('generatorLength', 13),
                 generatedPassword: '',
             }
         }

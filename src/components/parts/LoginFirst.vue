@@ -12,7 +12,7 @@
 </template>
 
 <script>
-    import translate from './helpers/Translate'
+    import translate from '../helpers/Translate'
 
     /**
      * Login first popup / overlay
