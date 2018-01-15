@@ -11,7 +11,7 @@
     "nowpassOption": "Options",
     "apiUrl": "API server URL",
     "apiEmail": "Email / Login",
-    "apiPassword": "Pass phrase",
+    "apiPassword": "Password",
     "storePassphrase": "Store pass phrase?",
     "passphrase": "Pass phrase",
     "insecure": "Insecure",

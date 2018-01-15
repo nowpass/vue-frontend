@@ -70,8 +70,8 @@ export default class {
             method: 'get',
             url: url,
         })
-            .then(resolve)
-            .catch(fail);
+          .then(resolve)
+          .catch(fail);
     }
 
     /**

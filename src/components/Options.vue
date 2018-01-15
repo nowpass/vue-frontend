@@ -148,7 +148,13 @@
                     vm.success = true;
                     vm.store(response.data.apiKey);
                 }).catch(function (error) {
-                    vm.errorMsg = error.response.status + ' ' + error.response.statusText;
+
+                    if (error.response) {
+                        vm.errorMsg = error.response.status + ' ' + error.response.statusText;
+                        return;
+                    }
+
+                    vm.errorMsg = 'Unkown connection error. Check if the API backend server is running. ';
                 });
             },
 

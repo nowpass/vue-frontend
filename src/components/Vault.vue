@@ -321,10 +321,12 @@
 
                 // TODO show notification
 
-                if (error.response.status === 401) {
+                if (error.response && error.response.status === 401) {
                     this.$router.push('/options');
                 }
 
+                // Redirect to test api
+                this.$router.push('/options');
             },
 
             /**
