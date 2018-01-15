@@ -4,7 +4,6 @@
   "description": "Vue.js 2 Frontend of the NOWPASS password manager",
   "author": "Yves Hoppe <yves.hoppe@nowpass.org>",
   "license": "GPL-3.0",
-  "private": true,
   "scripts": {
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
     "start": "npm run dev",
@@ -95,7 +94,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/nowpass/frontend.git"
+    "url": "git://github.com/nowpass/vue-frontend.git"
   },
   "browserslist": [
     "> 1%",
