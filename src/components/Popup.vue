@@ -121,7 +121,7 @@
         mixins: [settings, decrypt],
         created() {
             // Make sure user is logged in :-)
-            if (this.apiKey === '') {
+            if (this.apiKey !== '') {
                 this.showLoginFirst = false;
             }
         },
