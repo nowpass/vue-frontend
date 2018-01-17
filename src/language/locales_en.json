@@ -62,6 +62,7 @@
     "login_success": "Login was successful!",
     "you_are_now_connected_to_nowpass": "You are now connected to the NOWPASS API backend server.",
     "no_elements": "No elements",
-    "no_notes": "No notes"
+    "no_notes": "No notes",
+    "export": "Export"
   }
 }

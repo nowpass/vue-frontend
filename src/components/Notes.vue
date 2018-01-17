@@ -135,17 +135,20 @@
     import Loading from "./parts/Loading";
     import Pagination from "./parts/Pagination"
 
+    // Mixins
+    import settings from '../mixins/settings';
+    import decrypt from '../mixins/decrypt'
+
+    // Modules
+    import ApiNotes from '../modules/api-notes'
+
     // 3rd party
-    import axios from 'axios'
     import Icon from 'vue-awesome/components/Icon'
     import dropdown from 'vue-my-dropdown';
     import {format} from 'date-fns';
     import {en} from 'date-fns';
     import debounce from 'lodash/debounce'
 
-    // Mixins
-    import settings from '../mixins/settings';
-    import decrypt from '../mixins/decrypt'
 
     // Font Awesome icons
     import 'vue-awesome/icons/user-circle'
@@ -187,50 +190,40 @@
             loadNotes: function () {
                 this.toggleLoading();
 
-                // Base URL (TODO move to mixin const)
-                let url = this.apiUrl + '/api/v1/notes';
+                let filters = {
+                    search: this.filterSearch,
+                    order_by: this.orderByValue + ' ' + (this.orderByASC ? 'ASC' : 'DESC'),
+                    offset: this.offset,
+                    limit: this.limit
+                };
 
-                let parts = [];
+                this.apiNotes.load(filters, this.resolveLoad, this.failLoad)
+            },
 
-                // Filter Search
-                if (this.filterSearch !== '') {
-                    parts.push('search=' + this.filterSearch);
+            /**
+             * Resolve the response for loading
+             */
+            resolveLoad(response) {
+                this.notes = response.data['notes'];
+                this.total = parseInt(response.data['total']);
+
+                this.toggleLoading();
+            },
+
+            /**
+             * Fail for load
+             */
+            failLoad(error) {
+                console.log("Error loading notes: " + JSON.stringify(error));
+
+                // TODO show notification
+
+                if (error.response && error.response.status === 401) {
+                    this.$router.push('/options');
                 }
 
-                // Add Ordering
-                parts.push('order_by=' + this.orderByValue + ' ' + (this.orderByASC ? 'ASC' : 'DESC'));
-
-                // Limit / Offset
-                parts.push('offset=' + this.offset);
-                parts.push('limit=' + this.limit);
-
-                // Build URL (TODO optimize)
-                for (let i = 0; i < parts.length; i++) {
-                    let glue = (i === 0) ? '?' : '&';
-
-                    url += glue + parts[i];
-                }
-
-                // Encode possible special chars
-                url = encodeURI(url);
-
-                // Reference
-                var vm = this;
-
-                axios({
-                    method: 'get',
-                    url: url,
-                    headers: {'api-key': this.apiKey},
-                }).then(function (response) {
-                    vm.notes = response.data['notes'];
-                    vm.total = parseInt(response.data['total']);
-
-                    vm.toggleLoading();
-                }).catch(function (error) {
-                    console.log(error);
-                    // Redirect
-                    // vm.$router.push('/Options');
-                });
+                // Redirect to test api
+                this.$router.push('/options');
             },
 
             /**
@@ -244,49 +237,22 @@
                     return;
                 }
 
-                // Clone element, as we have to delete things (like clear text password)
-                let note = JSON.parse(JSON.stringify(noteToSave));
-
-                let method = 'post';
-
-                // Base URL (TODO move to const)
-                let url = this.apiUrl + '/api/v1/notes';
-
-                // Update
-                if (note.id) {
-                    method = 'patch';
-                    url = url + '/' + note.id;
+                // Let's make sure the note is encrypted..
+                if (noteToSave.clearContent) {
+                    noteToSave.content = this.encrypt(noteToSave.clearContent, this.passphrase);
                 }
 
-                // Let's make sure the password is encrypted..
-                if (note.clearContent) {
-                    note.content = this.encrypt(note.clearContent, this.passphrase);
-                }
-
-                delete(note.clearContent);
-
-                // Make sure no spaces are left
-                note.title = note.title.trim();
-
-                // Reference
-                var vm = this;
-
-                axios.defaults.headers['Content-Type'] = 'application/vnd.api+json';
-                axios.defaults.headers['Accept'] = 'application/vnd.api+json';
-
-                axios({
-                    method: method,
-                    url: url,
-                    headers: {'api-key': this.apiKey},
-                    data: JSON.stringify(note)
-                }).then(function (response) {
-                    // Trigger reload
-                    vm.loadNotes();
-                }).catch(function (error) {
-                    // TODO handle error
-                    console.log(error);
-                });
+                this.apiNotes.store(noteToSave, this.loadNotes, this.failSave);
             },
+
+            /**
+             *  Error handling for failed saving
+             */
+            failSave(error) {
+                // TODO handle error
+                console.log(error);
+            },
+
 
             /**
              * Go to page
@@ -345,7 +311,9 @@
                     return;
                 }
 
-                note.clearContent = this.decrypt(note.content, this.passphrase);
+                if (note.content) {
+                    note.clearContent = this.decrypt(note.content, this.passphrase);
+                }
 
                 this.editNote = note;
             },
@@ -409,7 +377,7 @@
         },
         data() {
             return {
-                apiUrl: this.getSetting('apiUrl', ''),
+                apiNotes: new ApiNotes(this.getSetting('apiUrl', ''), this.getSetting('apiKey', '')),
                 apiKey: this.getSetting('apiKey', ''),
                 showLoginFirst: false,
 

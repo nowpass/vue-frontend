@@ -1,62 +1,61 @@
 import axios from 'axios'
 import ApiBase from "./api-base";
 
-export const GET_ELEMENTS = '/api/v1/elements';
-export const POST_ELEMENTS = '/api/v1/elements';
-export const DELETE_ELEMENTS = '/api/v1/elements/';
+export const GET = '/api/v1/notes';
+export const POST = '/api/v1/notes';
+export const DELETE = '/api/v1/notes/';
 
 export default class extends ApiBase {
 
     constructor(apiUrl, apiKey) {
         super(apiUrl, apiKey);
 
-        this.loadUrl = this.apiUrl + GET_ELEMENTS;
+        this.loadUrl = this.apiUrl + GET;
     }
 
     /**
-     * Store an element
-     * @param elementToSave {object}
+     * Store an note
+     * @param noteToSave {object}
      * @param resolve {function}
      * @param fail {function}
      */
-    store(elementToSave, resolve, fail) {
-        // Clone element, as we have to delete things (like clear text password)
-        let element = JSON.parse(JSON.stringify(elementToSave));
+    store(noteToSave, resolve, fail) {
+        // Clone note, as we have to delete things (like clear text)
+        let note = JSON.parse(JSON.stringify(noteToSave));
 
         let method = 'post';
 
-        let url = this.apiUrl + POST_ELEMENTS;
+        let url = this.apiUrl + POST;
 
         // Update
-        if (element.id) {
+        if (note.id) {
             method = 'patch';
-            url = url + '/' + element.id;
+            url = url + '/' + note.id;
         }
 
         // Let's make sure we don't expose unwanted information..
-        delete(element.clearPassword);
-        delete(element.unlocked);
+        delete(note.clearContent);
 
         // Make sure no spaces are left
-        element.title = element.title.trim();
+        note.title = note.title.trim();
 
         axios({
             method: method,
             url: url,
-            data: JSON.stringify(element)
+            data: JSON.stringify(note)
         })
             .then(resolve)
             .catch(fail);
     }
 
     /**
-     * Delete an element
+     * Delete a note
      * @param id {number}
      * @param resolve {function}
      * @param fail {function}
      */
     delete(id, resolve, fail) {
-        let url = this.apiUrl + DELETE_ELEMENTS + id;
+        let url = this.apiUrl + DELETE + id;
 
         axios({
             method: 'delete',

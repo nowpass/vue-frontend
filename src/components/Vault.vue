@@ -237,8 +237,8 @@
                 this.toggleLoading();
 
                 let filters = {
-                    filterSearch: this.filterSearch,
-                    orderBy: this.orderByValue + ' ' + (this.orderByASC ? 'ASC' : 'DESC'),
+                    search: this.filterSearch,
+                    order_by: this.orderByValue + ' ' + (this.orderByASC ? 'ASC' : 'DESC'),
                     offset: this.offset,
                     limit: this.limit
                 };
@@ -380,10 +380,11 @@
                     return;
                 }
 
-                let password = this.decrypt(element.password, this.passphrase);
-
-                element.unlocked = true;
-                element.clearPassword = password;
+                // Should always be true
+                if (element.password) {
+                    element.unlocked = true;
+                    element.clearPassword = this.decrypt(element.password, this.passphrase);
+                }
 
                 // Workaround for dev, so element gets update
                 element.title += ' ';

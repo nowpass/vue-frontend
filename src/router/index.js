@@ -9,6 +9,7 @@ import Lab from '@/components/Lab'
 import Insert from '@/components/Insert'
 import Store from '@/components/Store'
 import Generate from '@/components/Generate'
+import Export from '@/components/Export'
 
 Vue.use(Router)
 
@@ -26,6 +27,11 @@ export default new Router({
             path: '/notes',
             name: 'Notes',
             component: Notes
+        },
+        {
+            path: '/export',
+            name: 'Export',
+            component: Export
         },
         {
             path: '/options',

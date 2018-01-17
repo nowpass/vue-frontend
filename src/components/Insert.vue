@@ -70,11 +70,11 @@
                 this.toggleLoading();
 
                 let filters = {
-                    filterSearch: this.url,
-                    orderBy: 'id DESC', // newest first
+                    search: this.url,
+                    order_by: 'id DESC', // newest first
                     offset: 0,
                     limit: 50,
-                    pwOnly: true
+                    pw_only: true
                 };
 
                 this.apiElements.load(filters, this.resolveElements, this.failElements)
