@@ -12,31 +12,32 @@
             <div id="export-content">
                 <div class="alert alert-warning" v-if="errorMessage">
                     <h3>
-                        Error Exporting!
-
-                        <p>
-                        {{errorMessage}}
-                        </p>
+                        <translate v-once :word="'error_exporting'"/>!
                     </h3>
+                    <p>
+                        {{errorMessage}}
+                    </p>
                 </div>
 
                 <div class="row">
                     <div class="col-md-6">
                         <div class="card">
                             <div class="card-header">
-                                Export Vault as JSON
+                                <translate v-once :word="'export_vault_as_json'"/>
                             </div>
                             <div class="card-body">
                                 <p>
-                                    Export all saved elements from the Vault.
+                                    <translate v-once :word="'export_all_saved_elements_from_the_vault'"/>
                                 </p>
                                 <div class="form-group">
                                     <input type="checkbox" id="vaultWithPasswords" v-model="vaultWithPasswords"/>
-                                    <label for="vaultWithPasswords">Clear text Passwords (careful!)</label>
+                                    <label for="vaultWithPasswords">
+                                        <translate v-once :word="'clear_text_passwords'"/>
+                                    </label>
                                 </div>
                                 <div class="form-group">
                                     <button class="btn btn-primary" v-on:click.prevent="exportVault">
-                                        Download JSON
+                                        <translate v-once :word="'download_json'"/>
                                     </button>
                                 </div>
                             </div>
@@ -45,19 +46,21 @@
                     <div class="col-md-6">
                         <div class="card">
                             <div class="card-header">
-                                Export secure Notes as JSON
+                                <translate v-once :word="'export_secure_notes_as_json'"/>
                             </div>
                             <div class="card-body">
                                 <p>
-                                    Export all secure Notes from the Vault.
+                                    <translate v-once :word="'export_all_notes'"/>
                                 </p>
                                 <div class="form-group">
                                     <input type="checkbox" id="notesInClearText" v-model="notesInClearText"/>
-                                    <label for="notesInClearText">Notes in clear text (careful!)</label>
+                                    <label for="notesInClearText">
+                                        <translate v-once :word="'notes_with_clear_text'"/>
+                                    </label>
                                 </div>
                                 <div class="form-group">
                                     <button class="btn btn-primary" v-on:click.prevent="exportNotes">
-                                        Download JSON
+                                        <translate v-once :word="'download_json'"/>
                                     </button>
                                 </div>
                             </div>
@@ -88,6 +91,11 @@
         created() {
         },
         methods: {
+            /**
+             * Export the vault
+             * TODO more than 1000 items
+             * @async
+             */
             exportVault() {
                 let filters = {
                     search: '',
@@ -99,6 +107,10 @@
                 this.apiElements.load(filters, this.resolveExportVault, this.failExportVault);
             },
 
+            /**
+             * Resolve for the export
+             * @param result {object}
+             */
             resolveExportVault(result) {
                 let elements = result.data['elements'];
 
@@ -117,11 +129,19 @@
                 w.document.write(JSON.stringify(elements));
             },
 
+            /**
+             * Fail / Show error message on export
+             * @param error {object}
+             */
             failExportVault(error) {
                 // TODO enhance
                 this.errorMsg(JSON.stringify(error));
             },
 
+            /**
+             * Export the notes
+             * @async
+             */
             exportNotes() {
                 let filters = {
                     search: '',
@@ -133,6 +153,10 @@
                 this.apiNotes.load(filters, this.resolveExportNotes, this.failExportNotes);
             },
 
+            /**
+             * Resolve for the export
+             * @param result {object}
+             */
             resolveExportNotes(result) {
                 let notes = result.data['notes'];
 
@@ -151,6 +175,10 @@
                 w.document.write(JSON.stringify(notes));
             },
 
+            /**
+             * Fail exporting notes
+             * @param error {object}
+             */
             failExportNotes(error) {
                 // TODO enhance
                 this.errorMsg(JSON.stringify(error));

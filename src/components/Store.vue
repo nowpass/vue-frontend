@@ -38,6 +38,10 @@
         <div v-if="isLoading">
             <loading v-once></loading>
         </div>
+
+        <div v-if="isUnlockNeeded">
+            <unlock v-on:update_passphrase="setPassphrase" :disableCancel="true"></unlock>
+        </div>
     </div>
 </template>
 
@@ -45,6 +49,7 @@
     // Components
     import translate from './helpers/Translate'
     import loading from './parts/Loading'
+    import Unlock from './parts/Unlock'
 
     // Mixins
     import settings from '../mixins/settings'
@@ -66,18 +71,23 @@
         components: {
             translate,
             loading,
-            Icon
+            Icon,
+            Unlock
         },
         mixins: [settings, decrypt, formparse, chrome],
         created() {
             if (!this.postData) {
-                console.log('NO POST data');
+                console.log('NO POST data for storing');
 
                 // We shouldn't have been called actually
                 window.localStorage.setItem('lastPostRequest', '');
                 this.sendClosePopup();
 
                 return;
+            }
+
+            if (!this.passphrase) {
+                this.isUnlockNeeded = true;
             }
 
             this.loadElements();
@@ -246,6 +256,15 @@
              */
             toggleLoading() {
                 this.isLoading = !this.isLoading;
+            },
+
+            /**
+             * Resolve unlock
+             * @param passphrase {string}
+             */
+            setPassphrase(passphrase) {
+                this.passphrase = passphrase;
+                this.isUnlockNeeded = false;
             }
         },
         data() {
@@ -253,7 +272,7 @@
                 apiElements: new ApiElements(this.getSetting('apiUrl', ''), this.getSetting('apiKey', '')),
 
                 // What login are we looking for?
-                postData: JSON.parse(this.getSetting('lastPostRequest', '')),
+                postData: this.getSetting('lastPostRequest', '') ? JSON.parse(this.getSetting('lastPostRequest', '')) : null,
                 url: this.$route.params.url,
 
                 elements: [],
@@ -262,6 +281,7 @@
                 passphrase: this.getPassphrase(),
 
                 isLoading: false,
+                isUnlockNeeded: false
             }
         }
     }

@@ -130,7 +130,7 @@
     // Components
     import Login from './parts/LoginEdit';
     import translate from './helpers/Translate'
-    import Unlock from './Unlock'
+    import Unlock from './parts/Unlock'
     import LoginFirst from "./parts/LoginFirst";
     import Loading from "./parts/Loading";
     import Pagination from "./parts/Pagination"

@@ -12,7 +12,6 @@
     "apiUrl": "API server URL",
     "apiEmail": "Email / Login",
     "apiPassword": "Password",
-    "storePassphrase": "Store pass phrase?",
     "passphrase": "Pass phrase",
     "insecure": "Insecure",
     "vault": "Vault",
@@ -63,6 +62,15 @@
     "you_are_now_connected_to_nowpass": "You are now connected to the NOWPASS API backend server.",
     "no_elements": "No elements",
     "no_notes": "No notes",
-    "export": "Export"
+    "export": "Export",
+    "error_exporting": "Error exporting",
+    "export_vault_as_json": "Export Vault as JSON",
+    "export_all_saved_elements_from_the_vault": "Export all saved Elements for the Vault",
+    "clear_text_passwords": "Include passwords in clear text (careful)",
+    "download_json": "Download JSON",
+    "export_secure_notes_as_json": "Export secure notes as JSON",
+    "export_all_notes": "Export all notes",
+    "notes_with_clear_text": "Include clear text of the notes content (careful)",
+    "you_need_to_login_first": "Please login first!"
   }
 }

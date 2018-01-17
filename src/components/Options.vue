@@ -55,7 +55,7 @@
                 <div class="form-group">
                     <input type="checkbox" v-model="storePassphrase" id="store-passphrase"/>
                     <label id="label-store-passphrase" for="store-passphrase">
-                        <translate v-once :word="'storePassphrase'" /> (<translate v-once :word="'insecure'" />)
+                        <translate v-once :word="'remember_passphrase'" />
                     </label>
                 </div>
 
@@ -163,25 +163,25 @@
              * @param apiKey {string}
              */
             store: function (apiKey) {
-                this.saveSetting('apiUrl', this.apiUrl);
-                this.saveSetting('apiEmail', this.apiEmail);
+                this.setSetting('apiUrl', this.apiUrl);
+                this.setSetting('apiEmail', this.apiEmail);
 
                 // TODO Should not be saved after API key has been obtained
-                this.saveSetting('apiPassword', this.apiPassword);
+                this.setSetting('apiPassword', this.apiPassword);
 
                 // Remove passphrase
                 if (!this.storePassphrase) {
                     this.passphrase = '';
                 }
 
-                this.saveSetting('passphrase', this.passphrase);
-                this.saveSetting('apiKey', apiKey);
+                this.setSetting('passphrase', this.passphrase);
+                this.setSetting('apiKey', apiKey);
 
                 // Make sure it's stored
                 this.apiKey = apiKey;
 
                 // Store login time
-                this.saveSetting('loginTime', new Date().getTime());
+                this.setSetting('loginTime', new Date().getTime());
             }
         },
         data() {

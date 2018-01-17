@@ -195,7 +195,7 @@
 
     .now-modal-inner {
         background: #fff;
-        border-radius: 5px;
+        border-radius: 0;
     }
 
     .now-modal-title {

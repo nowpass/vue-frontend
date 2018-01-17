@@ -135,9 +135,9 @@
              */
             storeSettings() {
                 // Settings are saved as String ..
-                this.saveSetting('generatorNumbers', this.generatorNumbers ? '1' : '');
-                this.saveSetting('generatorSpecial', this.generatorSpecial ? '1' : '');
-                this.saveSetting('generatorLength', this.generatorLength);
+                this.setSetting('generatorNumbers', this.generatorNumbers ? '1' : '');
+                this.setSetting('generatorSpecial', this.generatorSpecial ? '1' : '');
+                this.setSetting('generatorLength', this.generatorLength);
 
             },
 

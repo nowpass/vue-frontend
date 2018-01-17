@@ -12,7 +12,7 @@
                         <translate :word="'passphrase'"/>
                     </label>
                     <input type="password" id="passhrase" class="form-control" v-model.trim="passphrase"
-                           v-on:keyup.13="unlock()"/>
+                           v-on:keyup.13="unlock()" autocomplete="new-password"/>
                 </div>
                 <div class="form-group">
                     <input id="remember" v-model="remember" type="checkbox" />
@@ -24,7 +24,7 @@
             <div class="now-modal-footer text-center">
                 <div class="form-group">
                     <button class="btn btn-default"
-                            v-on:click.prevent="close()">
+                            v-on:click.prevent="close()" v-if="!disableCancel">
                         <translate :word="'cancel'"/>
                     </button>
                     <button class="btn btn-primary" v-on:click.prevent="unlock()">
@@ -38,18 +38,18 @@
 
 <script>
     // Components
-    import translate from './helpers/Translate'
+    import translate from '../helpers/Translate'
 
     // Mixins
-    import settings from '../mixins/settings'
-    import chrome from "../mixins/chrome";
+    import settings from '../../mixins/settings'
+    import chrome from "../../mixins/chrome";
 
     /**
      * Unlocks the passphrase
      */
     export default {
         name: "unlock",
-        props: ['element', 'task'],
+        props: ['element', 'task', 'disableCancel'],
         components: {translate},
         mixins: [settings, chrome],
         methods: {
@@ -62,10 +62,10 @@
                 }
 
                 if (this.remember) {
-                    this.saveSetting('passphrase', this.passphrase);
+                    this.setSetting('passphrase', this.passphrase);
                 } else {
                     // Reseted on every extension launch
-                    this.saveSetting('temporary_passphrase', this.passphrase);
+                    this.setSetting('temporary_passphrase', this.passphrase);
                 }
 
                 // Popup mode

@@ -13,7 +13,7 @@ export default {
             return def;
         },
 
-        saveSetting(key, val) {
+        setSetting(key, val) {
             window.localStorage.setItem(key, val);
         },
 

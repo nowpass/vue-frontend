@@ -83,7 +83,7 @@
 <script>
     // Components
     import translate from './helpers/Translate'
-    import Unlock from './Unlock'
+    import Unlock from './parts/Unlock'
     import LoginFirst from "./parts/LoginFirst";
     import loading from './parts/Loading'
 
@@ -121,7 +121,7 @@
         mixins: [settings, decrypt],
         created() {
             // Make sure user is logged in :-)
-            if (this.apiKey !== '') {
+            if (this.apiKey === '') {
                 this.showLoginFirst = false;
             }
         },
