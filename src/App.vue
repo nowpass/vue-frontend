@@ -231,6 +231,12 @@
         background: #f1f1f1;
     }
 
+    /* Text helpers */
+    .text-ellipsis {
+        white-space: nowrap;
+        overflow:hidden;
+        text-overflow: ellipsis;
+    }
 </style>
 
 <style lang="scss">

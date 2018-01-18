@@ -48,11 +48,11 @@
                          class="single-note list-group-item"
                          v-bind:id="'note-' + note.id">
                         <div class="row info-note align-items-center" v-on:click="showNote(note)">
-                            <div class="col-md-5">
+                            <div class="col-md-5 text-ellipsis">
                                 <a v-bind:href="note.url" target="_blank">{{note.url}}</a>
                             </div>
 
-                            <div class="col-md-4">
+                            <div class="col-md-4 text-ellipsis">
                                 {{note.title}}
                             </div>
 

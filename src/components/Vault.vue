@@ -57,12 +57,12 @@
                                 <icon v-bind:name="iconMapping[element.kind]"></icon>
                             </div>
 
-                            <div class="col-md-3">
+                            <div class="col-md-3 text-ellipsis">
                                 {{element.title}}
                             </div>
 
-                            <div class="col-md-3">
-                                <a v-bind:href="element.url" target="_blank">{{element.url}}</a>
+                            <div class="col-md-3 text-ellipsis">
+                                <a v-bind:href="element.url" target="_blank" v-bind:title="element.url">{{element.url}}</a>
                             </div>
 
                             <div class="col-md-2">
@@ -100,7 +100,6 @@
 
                 <pagination :limit="limit" :currentPage="currentPage" :itemsLength="elements.length" :itemsTotal="total"
                             v-on:changeLimit="changeLimit" v-on:changeCurrentPage="goToPage"/>
-
 
             </div><!-- //Elements -->
 
