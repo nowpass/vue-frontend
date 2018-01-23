@@ -3,7 +3,7 @@
 
         <div class="container-fluid text-left">
             <div id="header" class="text-left row">
-                <div class="col-9">
+                <div class="col-8">
                     <h3>
                         <translate v-once :word="'vault'"/>
                     </h3>
@@ -11,6 +11,9 @@
                 <div class="col-3 text-right">
                     <input type="text" placeholder="Search" v-model="filterSearch" class="form-control"
                            v-on:keyup="searchElements()"/>
+                </div>
+                <div class="col-1 text-right">
+                    <lock-icon :passphrase="passphrase" />
                 </div>
             </div>
 
@@ -175,6 +178,10 @@
     import translate from './helpers/Translate'
     import Unlock from './parts/Unlock'
     import LoginFirst from "./parts/LoginFirst";
+    import Loading from "./parts/Loading";
+    import Pagination from "./parts/Pagination";
+    import Generate from "./Generate";
+    import LockIcon from "./parts/LockIcon";
 
     // Mixins
     import settings from '../mixins/settings';
@@ -195,9 +202,7 @@
     import 'vue-awesome/icons/sort'
     import 'vue-awesome/icons/plus-circle'
     import 'vue-awesome/icons/spinner'
-    import Loading from "./parts/Loading";
-    import Pagination from "./parts/Pagination";
-    import Generate from "./Generate";
+
 
     /**
      * Main Management for Elements (except Notes)
@@ -205,6 +210,7 @@
     export default {
         name: 'nowpass',
         components: {
+            LockIcon,
             Generate,
             Pagination,
             Loading,
@@ -213,6 +219,7 @@
             translate,
             Login,
             Unlock,
+            LockIcon,
             // 3rd party
             Icon,
             contextMenu
