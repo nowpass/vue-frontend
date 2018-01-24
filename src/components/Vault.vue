@@ -13,7 +13,7 @@
                            v-on:keyup="searchElements()"/>
                 </div>
                 <div class="col-1 text-right">
-                    <lock-icon :passphrase="passphrase" />
+                    <lock-icon :passphrase="passphrase" v-on:lock-passphrase="lockPassphrase" v-on:unlock-passphrase="showUnlockPopup"/>
                 </div>
             </div>
 
@@ -164,9 +164,6 @@
             <li v-on:click="deleteElement($event, menuData)">
                 <translate :word="'delete_element'"/>
             </li>
-            <li>
-                <translate :word="'duplicate_element'"/>
-            </li>
         </context-menu>
 
     </div><!-- //App -->
@@ -202,7 +199,6 @@
     import 'vue-awesome/icons/sort'
     import 'vue-awesome/icons/plus-circle'
     import 'vue-awesome/icons/spinner'
-
 
     /**
      * Main Management for Elements (except Notes)
@@ -283,9 +279,8 @@
              */
             saveElement(saveElement) {
                 if (!this.passphrase) {
-                    this.showUnlock = true;
-                    this.unlockElement = null;
-                    this.unlockTask = '';
+                    this.showUnlockPopup();
+
                     return;
                 }
 
@@ -295,6 +290,15 @@
                 }
 
                 this.apiElements.store(saveElement, this.resolveSaveElement, this.failSaveElement)
+            },
+
+            /**
+             * Unlock passphrase
+             */
+            showUnlockPopup(element = null, unlockTask = '') {
+                this.showUnlock = true;
+                this.unlockElement = element;
+                this.unlockTask = unlockTask;
             },
 
             /**
@@ -380,9 +384,7 @@
             showPassword(element) {
                 // Let's unlock that and save passphrase in state (if wanted)
                 if (!this.passphrase) {
-                    this.showUnlock = true;
-                    this.unlockTask = 'password';
-                    this.unlockElement = element;
+                    this.showUnlockPopup(element, 'password');
                     return;
                 }
 
@@ -430,9 +432,7 @@
              */
             showGenerator(element) {
                 if (!this.passphrase) {
-                    this.unlockElement = element;
-                    this.unlockTask = 'generator';
-                    this.showUnlock = true;
+                    this.showUnlockPopup(element, 'generator');
 
                     return;
                 }
@@ -454,8 +454,6 @@
              * @param generatedPassword {string}
              */
             useGeneratedPassword(generatedPassword) {
-                console.log('Using generated pw' + generatedPassword);
-
                 this.generatorElement.password = this.encrypt(generatedPassword, this.passphrase);
                 this.generatorElement.clearPassword = generatedPassword;
                 this.generatorElement.unlocked = true;
@@ -548,6 +546,14 @@
                 this.resetPage();
                 this.loadElements();
             }, 300),
+
+            /**
+             * Lock the passphrase
+             */
+            lockPassphrase() {
+                this.clearPassphrase();
+                this.passphrase = '';
+            },
         },
         data() {
             return {

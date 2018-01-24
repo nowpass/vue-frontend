@@ -1,6 +1,6 @@
 <template>
-    <div id="lock-icon">
-        <icon :name="icon" scale="2"></icon>
+    <div id="lock-icon" v-on:click.prevent="toggleLock">
+        <icon :name="this.passphrase ? 'unlock' : 'lock'" scale="2"></icon>
     </div>
 </template>
 
@@ -21,9 +21,21 @@
         mixins: [settings],
         created() {
         },
-        data() {
-            return {
-                icon: this.passphrase ? 'unlock' : 'lock'
+        methods: {
+            /**
+             * Lock / Unlock the passphrase
+             */
+            toggleLock: function () {
+                // Lock
+                if (this.passphrase) {
+                    this.clearPassphrase();
+
+                    this.$emit('lock-passphrase');
+
+                    return;
+                }
+
+                this.$emit('unlock-passphrase');
             }
         }
     }

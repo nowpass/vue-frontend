@@ -3,7 +3,7 @@
 
         <div class="container-fluid text-left">
             <div id="header" class="text-left row">
-                <div class="col-9">
+                <div class="col-8">
                     <h3>
                         <translate v-once :word="'notes'"/>
                     </h3>
@@ -11,6 +11,9 @@
                 <div class="col-3 text-right">
                     <input type="text" placeholder="Search" v-model="filterSearch" class="form-control"
                            v-on:keyup="searchElements"/>
+                </div>
+                <div class="col-1 text-right">
+                    <lock-icon :passphrase="passphrase" v-on:lock-passphrase="lockPassphrase" v-on:unlock-passphrase="showUnlockPopup"/>
                 </div>
             </div>
 
@@ -47,7 +50,9 @@
                     <div v-for="note in notes"
                          class="single-note list-group-item"
                          v-bind:id="'note-' + note.id">
-                        <div class="row info-note align-items-center" v-on:click="showNote(note)">
+                        <div class="row info-note align-items-center"
+                             v-on:contextmenu.prevent="$refs.noteContextMenu.open($event, {note: note})"
+                             v-on:click="showNote(note)">
                             <div class="col-md-5 text-ellipsis">
                                 <a v-bind:href="note.url" target="_blank">{{note.url}}</a>
                             </div>
@@ -123,6 +128,13 @@
             <login-first v-once></login-first>
         </div>
 
+        <context-menu id="element-context" ref="noteContextMenu" @ctx-open="onNoteContextMenu"
+                      @ctx-cancel="resetNoteContextMenu">
+            <li v-on:click="deleteNote($event, menuData)">
+                <translate :word="'delete_note'"/>
+            </li>
+        </context-menu>
+
     </div><!-- //App -->
 </template>
 
@@ -134,6 +146,7 @@
     import LoginFirst from "./parts/LoginFirst";
     import Loading from "./parts/Loading";
     import Pagination from "./parts/Pagination"
+    import LockIcon from "./parts/LockIcon";
 
     // Mixins
     import settings from '../mixins/settings';
@@ -148,7 +161,7 @@
     import {format} from 'date-fns';
     import {en} from 'date-fns';
     import debounce from 'lodash/debounce'
-
+    import contextMenu from 'vue-context-menu'
 
     // Font Awesome icons
     import 'vue-awesome/icons/user-circle'
@@ -165,12 +178,15 @@
         components: {
             Loading,
             LoginFirst,
-            Icon,
             dropdown,
             translate,
             Login,
             Unlock,
-            Pagination
+            LockIcon,
+            Pagination,
+            // 3rd Party
+            Icon,
+            contextMenu
         },
         mixins: [settings, decrypt],
         /**
@@ -231,9 +247,7 @@
              */
             saveNote: function (noteToSave) {
                 if (!this.passphrase) {
-                    this.showUnlock = true;
-                    this.unlockNote = null;
-                    this.unlockTask = '';
+                    this.showUnlockPopup();
                     return;
                 }
 
@@ -300,9 +314,7 @@
             showNote: function (note) {
                 // Let's unlock that and save passphrase in state
                 if (!this.passphrase) {
-                    this.showUnlock = true;
-                    this.unlockTask = 'note';
-                    this.unlockNote = note;
+                    this.showUnlockPopup(note, 'note');
                     return;
                 }
 
@@ -373,7 +385,51 @@
              */
             getComputed(date) {
                 return format(date, 'MM/DD/YYYY @ h:mm a', {locale: en});
-            }
+            },
+
+            /**
+             * Lock the passphrase
+             */
+            lockPassphrase() {
+                this.clearPassphrase();
+                this.passphrase = '';
+            },
+
+            /**
+             * Unlock passphrase
+             */
+            showUnlockPopup(note = null, unlockTask = '') {
+                this.showUnlock = true;
+                this.unlockNote = note;
+                this.unlockTask = unlockTask;
+            },
+
+            /**
+             * Delete an item
+             * @param evt {Event)
+             * @param data {object}
+             */
+            deleteNote(evt, data) {
+                this.apiNotes.delete(data.note.id, (result) => {
+                    this.loadNotes()
+                }, (error) => {
+                    console.log(error)
+                })
+            },
+
+            /**
+             * Temporary store item data
+             */
+            onNoteContextMenu(locals) {
+                this.menuData = locals
+            },
+
+            /**
+             * Reset context menu
+             */
+            resetNoteContextMenu() {
+                this.menuData = null;
+            },
         },
         data() {
             return {
