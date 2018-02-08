@@ -6,7 +6,7 @@
                 <div id="nowpass-menu" v-once v-if="hasMenu()" v-bind:class="hasMenu() ? 'col-sm-2' : ''">
                     <div class="list-group">
                         <div id="nowpass-logo" class="text-center">
-                            <img src="./assets/nowpass-logo-transparent-300px.png">
+                            <img src="./assets/nowpass-logo-transparent-300px.png" alt="NOWPASS Password Manager">
                         </div>
 
                         <router-link to="/" class="list-group-item">

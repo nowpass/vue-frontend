@@ -1,7 +1,7 @@
 <template>
     <div id="login-first" class="now-modal now-fade" v-once>
         <h2>
-            <router-link to="/options" target="_blank">
+            <router-link to="/options" v-bind:target="isChrome ? '_blank' : ''">
                 <!-- TODO add a nice image -->
                 <h1>
                     <translate v-once :word="'you_need_to_login_first'"/>
@@ -21,7 +21,9 @@
         name: "login-first",
         components: {translate},
         data() {
-            return {}
+            return {
+                isChrome: typeof chrome == 'undefined' ? false : true
+            }
         }
     }
 </script>

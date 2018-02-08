@@ -22,9 +22,11 @@
              * @returns {string}
              */
             translate(string, ucfirst=false, placeholders) {
-                if (process.env.NODE_ENV === 'development') {
+                if (process.env.NODE_ENV === 'development' || typeof chrome == "undefined") {
                     return this.$t(string)
                 }
+
+                console.log('IN produciton environment');
 
                 let trans = '';
 
