@@ -8,6 +8,11 @@
                 </h4>
             </div>
             <div id="list-elements" class="list-group-item">
+                <div v-if="errorMsg" class="alert alert-danger">
+                    <h3><translate v-once :word="'error_loading_elements'"/></h3>
+                    {{errorMsg}}
+                </div>
+
                 <div v-if="elements.length" class="list-group-item">
                     <translate v-once :word="'update_existing_login'"/>
                 </div>
@@ -124,6 +129,8 @@
              * Fail for load Elements
              */
             failElements(error) {
+                this.toggleLoading();
+
                 window.localStorage.setItem('lastPostRequest', '');
 
                 console.log("Error loading elements: " + JSON.stringify(error));
