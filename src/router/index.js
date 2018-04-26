@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import Options from '@/components/Options'
 import Vault from '@/components/Vault'
 import Notes from '@/components/Notes'
+import Sites from '@/components/Sites'
 import Popup from '@/components/Popup'
 import Unlock from '@/components/parts/Unlock'
 import Lab from '@/components/Lab'
@@ -27,6 +28,11 @@ export default new Router({
             path: '/notes',
             name: 'Notes',
             component: Notes
+        },
+        {
+            path: '/sites',
+            name: 'Sites',
+            component: Sites
         },
         {
             path: '/export',
@@ -60,6 +66,11 @@ export default new Router({
         },
         {
             path: '/generate',
+            name: 'nowpass Generator',
+            component: Generate
+        },
+        {
+            path: '/generatePopup',
             name: 'nowpass Generator',
             component: Generate
         },

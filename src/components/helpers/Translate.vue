@@ -26,8 +26,6 @@
                     return this.$t(string)
                 }
 
-                console.log('IN produciton environment');
-
                 let trans = '';
 
                 if (!placeholders) {
@@ -38,7 +36,7 @@
 
                 if (!trans) {
                     // Warn in console
-                    console.log('No translation for ' + string + '. At the following to the messages.json.');
+                    console.log('No translation for ' + string + '. Add the following to the messages.json.');
                     console.log('"' + string + '": {\n\t"message":"' + string+ '"\n},');
                 }
 

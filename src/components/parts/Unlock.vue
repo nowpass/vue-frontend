@@ -74,11 +74,6 @@
                     return;
                 }
 
-                if (process.env.NODE_ENV === 'development') {
-                    this.$router.push('/');
-                    return;
-                }
-
                 this.closeCurrentBrowserTab();
             },
             /**
@@ -89,11 +84,6 @@
 
                 if (this.$route.path !== '/unlock') {
                     this.$emit('update_passphrase', this.passphrase, this.element, this.task);
-                    return;
-                }
-
-                if (process.env.NODE_ENV === 'development') {
-                    this.$router.push('/');
                     return;
                 }
 

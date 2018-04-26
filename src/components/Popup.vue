@@ -2,7 +2,7 @@
     <div id="popup">
         <div class="list-group">
             <div class="list-group-item list-group-item-light">
-                <input type="text" placeholder="Search" v-model="filterSearch" class="form-control"
+                <input type="text" placeholder="Search Vault" v-model="filterSearch" class="form-control"
                        v-on:keyup="searchElements()"/>
             </div>
         </div>
@@ -29,37 +29,49 @@
             </div>
         </div>
 
-        <div class="list-group-item align-self-center">
+        <div class="list-group-item list-group-item-action list-group-item-primary">
             <router-link to="/" target="_blank">
                 <icon name="unlock-alt"></icon>
                 <translate v-once :word="'my_vault'"/>
             </router-link>
         </div>
-        <div class="list-group-item">
+        <div class="list-group-item list-group-item-action">
             <router-link to="/notes" target="_blank">
                 <icon name="sticky-note-o"></icon>
                 <translate v-once :word="'my_notes'"/>
             </router-link>
         </div>
-        <div class="list-group-item">
-            <router-link to="/generate">
+        <div class="list-group-item list-group-item-action">
+            <router-link to="/sites" target="_blank">
+                <icon name="sitemap"></icon>
+                <translate v-once :word="'my_sites'"/>
+            </router-link>
+        </div>
+        <div class="list-group-item list-group-item-action">
+            <a href="#" v-on:click.prevent="storeSite">
+               <icon name="bookmark"></icon>
+               <translate v-once :word="'store_current_site'"/>
+            </a>
+        </div>
+        <div class="list-group-item list-group-item-action">
+            <router-link to="/generatePopup">
                 <icon name="random"></icon>
                 <translate v-once :word="'generate_password'"/>
             </router-link>
         </div>
-        <div class="list-group-item">
+        <div class="list-group-item list-group-item-action">
             <a href="https://nowpass.org/help" target="_blank">
                 <icon name="question-circle"></icon>
                 <translate v-once :word="'help'"/>
             </a>
         </div>
-        <div class="list-group-item">
+        <div class="list-group-item list-group-item-action">
             <router-link to="/options" target="_blank">
                 <icon name="cog"></icon>
                 <translate v-once :word="'options'"/>
             </router-link>
         </div>
-        <div class="list-group-item list-group-item-light">
+        <div class="list-group-item list-group-item-action">
             <router-link to="/logout" target="_blank">
                 <icon name="sign-out"></icon>
                 <translate v-once :word="'logout'"/>
@@ -90,6 +102,7 @@
     // Mixins
     import settings from '../mixins/settings'
     import decrypt from '../mixins/decrypt'
+    import chrome from "../mixins/chrome";
 
     // Modules
     import ApiElements from '../modules/api-elements'
@@ -105,6 +118,8 @@
     import 'vue-awesome/icons/random'
     import 'vue-awesome/icons/sticky-note-o'
     import 'vue-awesome/icons/unlock-alt'
+    import 'vue-awesome/icons/sitemap'
+    import 'vue-awesome/icons/bookmark'
 
     /**
      * View for the extension popup
@@ -118,7 +133,7 @@
             Unlock,
             Icon
         },
-        mixins: [settings, decrypt],
+        mixins: [settings, decrypt, chrome],
         created() {
             // Make sure user is logged in :-)
             if (this.apiKey !== '') {
@@ -163,7 +178,8 @@
             failElements(error) {
                 console.log("Error loading elements: " + JSON.stringify(error));
 
-                 // TODO
+                this.toggleLoading();
+                this.showLoginFirst = true;
             },
 
             /**
@@ -189,6 +205,15 @@
 
                 document.execCommand("Copy");
                 document.oncopy = undefined;
+            },
+
+            /**
+             * Stores the current site
+             */
+            storeSite() {
+                console.log('Storing current tabs website');
+
+                this.sendBrowserMessage({task: 'storeSite'});
             },
 
             /**

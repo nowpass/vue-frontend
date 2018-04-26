@@ -73,6 +73,12 @@
     "notes_with_clear_text": "Include clear text of the notes content (careful)",
     "you_need_to_login_first": "Please login first!",
     "delete_note": "Delete Note",
-    "error_loading_elements": "Error loading elements"
+    "error_loading_elements": "Error loading elements",
+    "my_sites": "My Sites",
+    "store_current_site": "Store current URL",
+    "tags": "Tags",
+    "no_sites": "No Sites",
+    "delete_site": "Delete Site",
+    "sites": "Sites"
   }
 }

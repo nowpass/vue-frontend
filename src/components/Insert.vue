@@ -111,11 +111,6 @@
              * @param element {object}
              */
             insert: function (element) {
-                if (process.env.NODE_ENV === 'development') {
-                    console.log('In DEV environment');
-                    return;
-                }
-
                 let message = {
                     task: 'insert',
                     login: {
@@ -133,11 +128,6 @@
              * Close the Popup
              */
             close: function () {
-                if (process.env.NODE_ENV === 'development') {
-                    console.log('In DEV environment');
-                    return;
-                }
-
                 this.sendBrowserMessage({task: 'insertClose'});
             },
 

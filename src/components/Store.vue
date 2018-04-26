@@ -251,10 +251,6 @@
              * Close Popup
              */
             sendClosePopup() {
-                if (process.env.NODE_ENV === 'development') {
-                    return;
-                }
-
                 this.sendBrowserMessage({task: 'storeClose'});
             },
 

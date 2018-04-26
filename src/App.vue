@@ -18,6 +18,12 @@
                             <icon name="sticky-note-o"></icon>
                             <translate v-once :word="'secure_notes'"/>
                         </router-link>
+
+                        <router-link to="/sites" class="list-group-item">
+                            <icon name="bookmark-o"></icon>
+                            <translate v-once :word="'sites'"/>
+                        </router-link>
+
                         <router-link to="/export" class="list-group-item">
                             <icon name="download"></icon>
                             <translate v-once :word="'export'"/>
@@ -27,8 +33,6 @@
                             <icon name="cog"></icon>
                             <translate v-once :word="'options'"/>
                         </router-link>
-
-
 
                         <a href="https://nowpass.org/help" target="_blank" class="list-group-item">
                             <icon name="question"></icon>
@@ -70,6 +74,7 @@
     import 'vue-awesome/icons/cog'
     import 'vue-awesome/icons/question'
     import 'vue-awesome/icons/download'
+    import 'vue-awesome/icons/bookmark-o'
 
     /**
      * Entry point (mostly just an skeleton, logic is in the components)

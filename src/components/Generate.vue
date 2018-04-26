@@ -15,7 +15,7 @@
                         <input type="text" id="generator-password" class="form-control"
                                v-model.trim="generatedPassword"/>
                         <div class="input-group-append">
-                            <button class="btn btn-default" v-on:click="setGeneratedPassword()">
+                            <button class="btn btn-default" v-on:click="setGeneratedPassword">
                                 <icon name="refresh"></icon>
                             </button>
                         </div>
@@ -23,14 +23,14 @@
                 </div>
 
                 <div class="form-group">
-                    <input id="generator-numbers" type="checkbox" v-model="generatorNumbers" v-on:change="setGeneratedPassword()"/>
+                    <input id="generator-numbers" type="checkbox" v-model="generatorNumbers" v-on:change="setGeneratedPassword"/>
                     <label for="generator-numbers">
                         <translate :word="'numbers'"/>
                         (0-9)</label>
                 </div>
 
                 <div class="form-group">
-                    <input id="generator-special" type="checkbox" v-model="generatorSpecial" v-on:change="setGeneratedPassword()"/>
+                    <input id="generator-special" type="checkbox" v-model="generatorSpecial" v-on:change="setGeneratedPassword"/>
                     <label for="generator-special">
                         <translate :word="'special_characters'"/>
                     </label>
@@ -147,14 +147,15 @@
             close() {
                 this.generatedPassword = "";
 
-                // Used in vault etc. on the extension itself (not in an iframe)
-                if (this.isUsedIntern) {
-                    this.$emit('closeGenerator');
+                // Used in Popup
+                if (this.$route.path === '/generatePopup') {
+                    this.$router.push('/popup');
                     return;
                 }
 
-                if (process.env.NODE_ENV === 'development') {
-                    console.log('In dev environment');
+                // Used in vault etc. on the extension itself (not in an iframe)
+                if (this.isUsedIntern) {
+                    this.$emit('closeGenerator');
                     return;
                 }
 
@@ -171,17 +172,18 @@
                     return;
                 }
 
-                if (process.env.NODE_ENV === 'development') {
-                    console.log('In dev environment');
+                this.sendBrowserMessage({task: 'generatedInsert', generatedPassword: this.generatedPassword});
+
+                // Used in Popup
+                if (this.$route.path === '/generatePopup') {
+                    this.$router.push('/popup');
                     return;
                 }
-
-                this.sendBrowserMessage({task: 'generatedInsert', generatedPassword: this.generatedPassword});
             }
         },
         data() {
             return {
-                isUsedIntern: this.$route.path === '/generate' ? false : true,
+                isUsedIntern: this.$route.path === '/generate' || this.$route.path === '/generatePopup' ? false : true,
 
                 // Generator
                 isGeneratorPopupActive: false,
